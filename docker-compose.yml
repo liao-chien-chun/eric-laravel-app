@@ -1,0 +1,65 @@
+# 指定 docker-compose 語法版本
+version: '3.8'
+
+# 定義多個服務(容器)
+services:
+  # app 服務(Laravel + PHP + Composer) 
+  app:
+    build:
+      context: .
+      # 用dockerfile 建立image
+      dockerfile: Dockerfile
+    # 指定容器名稱
+    container_name: laravel_app
+    # 將主機的 Laravel 專案資料夾掛載入容器的 /var/www
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    # 等待 mysql 與 redis 啟動後再跑 laravel app
+    depends_on:
+      - mysql 
+      - redis 
+
+  # MySQL 服務
+  mysql:
+    # 使用 mysql 8.0 官方 image 並設定自動重啟
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    # 設定初始密碼與使用者、資料庫
+    environment:  
+      MYSQL_ROOT_PASSWORD: root 
+      MYSQL_DATABASE: laravel 
+      MYSQL_USER: laravel 
+      MYSQL_PASSWORD: secret
+    # 將主機的 3306 prot 映射出來，資料掛載到 named volume
+    ports:
+      - "3306:3306"
+    # 建立一個 docker 的 volume 名為 db_data ，並掛載到容器內的 /var/lib/mysql 
+    # db_data: 它會存放在主機上，但由 Docker 管理。
+    volumes:
+      - db_data:/var/lib/mysql 
+
+  # Redis 服務
+  redis: 
+    image: redis:alpine
+    container_name: redis 
+    ports:
+      - "6379:6379"
+    
+  # Nginx 服務
+  nginx:
+    image: nginx:latest
+    container_name: nginx 
+    ports:
+      - "80:80"
+    # 掛載 Laravel 原始碼與 nginx.conf 設定檔進 nginx 容器。
+    volumes: 
+      - ./:/var/www 
+      - ./docker/nginx/:/etc/nginx/conf.d
+    depends_on:
+      - app
+
+# 定義 volume
+volumes:
+  db_data:
