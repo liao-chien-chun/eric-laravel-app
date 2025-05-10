@@ -52,7 +52,7 @@ services:
     image: nginx:latest
     container_name: nginx 
     ports:
-      - "80:80"
+      - "8080:80"
     # 掛載 Laravel 原始碼與 nginx.conf 設定檔進 nginx 容器。
     volumes: 
       - ./:/var/www 
