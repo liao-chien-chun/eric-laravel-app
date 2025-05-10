@@ -32,9 +32,9 @@ services:
       MYSQL_DATABASE: laravel 
       MYSQL_USER: laravel 
       MYSQL_PASSWORD: secret
-    # 將主機的 3306 prot 映射出來，資料掛載到 named volume
+    # 將主機的 3307 prot 映射出來，資料掛載到 named volume
     ports:
-      - "3306:3306"
+      - "3307:3306"
     # 建立一個 docker 的 volume 名為 db_data ，並掛載到容器內的 /var/lib/mysql 
     # db_data: 它會存放在主機上，但由 Docker 管理。
     volumes:
