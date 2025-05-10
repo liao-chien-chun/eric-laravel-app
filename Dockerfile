@@ -1,5 +1,5 @@
 # 使用 PHP 8.1 FPM 作為基底容器
-FROM php8.1-fpm 
+FROM php:8.1-fpm 
 
 # Laravel 常用的 PHP 擴充與系統工具
 RUN apt-get update && apt-get install -y \
