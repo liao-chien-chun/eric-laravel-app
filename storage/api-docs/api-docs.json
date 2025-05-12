@@ -1,0 +1,214 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Eric Laravel 架構模組 API 文件",
+        "description": "這是 API 文件",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "主要服務器"
+        }
+    ],
+    "paths": {
+        "/api/user/register": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "使用者註冊",
+                "description": "使用者註冊 API ，提供name, email, password, phone",
+                "operationId": "registerUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserRegisterRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "註冊成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserRegisterResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證失敗",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserRegisterValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "註冊失敗：內部伺服器錯誤"
+                                        },
+                                        "data": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UserRegisterRequest": {
+                "required": [
+                    "name",
+                    "email",
+                    "password",
+                    "password_confirmation"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Eric"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "eric@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    },
+                    "password_confirmation": {
+                        "type": "string",
+                        "example": "secret123"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "0912345678"
+                    }
+                },
+                "type": "object"
+            },
+            "UserRegisterResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 201
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "註冊成功"
+                    },
+                    "data": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Eric"
+                            },
+                            "email": {
+                                "type": "string",
+                                "example": "eric@example.com"
+                            },
+                            "phone": {
+                                "type": "string",
+                                "example": "0912345678"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-05-12 12:00:00"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-05-12 12:00:00"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "UserRegisterValidationError": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 422
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "驗證失敗"
+                    },
+                    "errors": {
+                        "properties": {
+                            "email": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "該 email 已經被註冊過了"
+                                }
+                            },
+                            "password": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "密碼至少6碼"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "User",
+            "description": "User"
+        }
+    ]
+}
