@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,3 +25,5 @@ Route::prefix('user')->group(function () {
     // 使用者註冊
     Route::post('/register', [UserController::class, 'register']);
 });
+
+Route::get('/test', [TestController::class, 'index']);
