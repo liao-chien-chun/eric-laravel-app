@@ -22,10 +22,11 @@ jobs:
       # 建立 SSH 連線金鑰
       - name: Setup SSH
         run: |
-          mkdir -p /home/runner/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > /home/runner/.ssh/id_rsa
-          chmod 600 /home/runner/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> /home/runner/.ssh/known_hosts
+          set -e
+          mkdir -vp "$HOME/.ssh"
+          echo "${{ secrets.EC2_SSH_KEY }}" > "$HOME/.ssh/id_rsa"
+          chmod 600 "$HOME/.ssh/id_rsa"
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> "$HOME/.ssh/known_hosts"
 
       # SSH 登入 EC2 並執行部署指令
       - name: Deploy via SSH
