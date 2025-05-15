@@ -22,6 +22,7 @@ jobs:
       # 建立 SSH 連線金鑰
       - name: Setup SSH
         run: |
+          set -e
           mkdir -vp "$HOME/.ssh"
           printf "%s\n" "${{ secrets.EC2_SSH_KEY }}" > "$HOME/.ssh/id_rsa"
           chmod 600 "$HOME/.ssh/id_rsa"
