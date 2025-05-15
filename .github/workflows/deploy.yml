@@ -1,0 +1,41 @@
+# 工作流程的名稱（會顯示在 GitHub Actions 的畫面上）
+name: Deploy to EC2 
+
+# 當有人 push 到 main 分支時，就會觸發這個 workflow
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    # 工作名稱
+    name: Deploy Laravel Project to EC2
+    # 指定 GitHub runner 執行環境（使用 Ubuntu）
+    runs-on: ubuntu-latest
+
+    steps:
+      # 讓 runner 把 GitHub 上的程式碼 clone 下來到 runner 的本地目錄中。
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 建立 SSH 連線金鑰
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      # SSH 登入 EC2 並執行部署指令
+      - name: Deploy via SSH
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd ${{ secrets.EC2_PATH }}
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
+            docker exec laravel_app php artisan config:cache
+            docker exec laravel_app php artisan route:cache
+            docker exec laravel_app php artisan migrate --force
+          EOF
