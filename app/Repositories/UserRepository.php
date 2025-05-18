@@ -25,4 +25,14 @@ class UserRepository
             'password' => $data['password'],
         ]);
     }
+
+    /**
+     * 使用 email 查詢使用者
+     * @param string $email
+     * @return object|User|\Illuminate\Database\Eloquent\Model|null
+     */
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
 }
