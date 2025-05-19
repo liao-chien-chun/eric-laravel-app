@@ -32,13 +32,29 @@ jobs:
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ${{ secrets.EC2_PATH }}
+
+        # 標記為 Git 安全目錄，避免權限錯誤
+            git config --global --add safe.directory /var/www
+
+            # 拉最新程式碼
+            git reset --hard
+            git clean -fd
             git pull origin main
+
+            # 重新啟動容器
             docker-compose down
             docker-compose up -d --build
+
+            # 安裝 Composer 套件與產生 Swagger 文件
             docker-compose exec -T app composer install --no-interaction --prefer-dist --optimize-autoloader
+            docker-compose exec -T app php artisan l5-swagger:generate
+
+            # 清除 Laravel 快取
             docker-compose exec -T app php artisan config:clear
             docker-compose exec -T app php artisan route:clear
             docker-compose exec -T app php artisan view:clear
+
+            # 重建 Laravel 快取並 migrate
             docker-compose exec -T app php artisan config:cache
             docker-compose exec -T app php artisan route:cache
             docker-compose exec -T app php artisan migrate --force
