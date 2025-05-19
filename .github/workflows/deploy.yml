@@ -30,10 +30,10 @@ jobs:
       # SSH 登入 EC2 並執行部署指令
       - name: Deploy via SSH
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
             cd ${{ secrets.EC2_PATH }}
 
-        # 標記為 Git 安全目錄，避免權限錯誤
+          # 標記為 Git 安全目錄，避免權限錯誤
             git config --global --add safe.directory /var/www
 
             # 拉最新程式碼
