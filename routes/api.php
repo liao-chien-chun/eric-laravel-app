@@ -25,4 +25,9 @@ Route::prefix('user')->group(function () {
     Route::post('/register', [UserController::class, 'register']);
     // 使用者登入
     Route::post('/login', [UserController::class, 'login']);
+
+    // 使用者登出
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/logout', [UserController::class, 'logout']);
+    });
 });
