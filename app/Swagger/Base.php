@@ -14,6 +14,16 @@ namespace App\Swagger;
  *         url="http://localhost:8080"
  *     )
  * )
+ * 
+ * @OA\SecurityScheme(
+ *         name="Authorization",
+ *         description="請輸入JWT token",
+ *         securityScheme="bearerAuth",
+ *         type="http",
+ *         in="header",
+ *         scheme="bearer",
+ *         bearerFormat="JWT"
+ *  )
  */
 
 class Base

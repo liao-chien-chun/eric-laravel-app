@@ -70,4 +70,31 @@ class UserController extends Controller
             ], $e->getCode() ? : 500);
         }
     }
+
+    /**
+     * 使用者登出
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        try {
+            $this->userService->logout();
+
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => '登出成功',
+                'data' => null
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => 500,
+                'message' => '登出失敗：' . $e->getMessage(),
+                'data' => null,
+            ], 500);
+        }
+    }
 }

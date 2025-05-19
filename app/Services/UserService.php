@@ -60,4 +60,19 @@ class UserService
             'user' => $user,
         ];
     }
+
+    /**
+     * 登出使用者
+     * 
+     * @return void 
+     * @throws Exception 登出失敗拋出錯誤
+     */
+    public function logout(): void
+    {
+        try {
+            auth()->logout(); 
+        } catch (JWTException $e) {
+            throw new Exception('Token 登出失敗');
+        }
+    }
 }
