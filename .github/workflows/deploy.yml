@@ -35,6 +35,7 @@ jobs:
             git pull origin main
             docker compose down
             docker compose up -d --build
+            docker exec -T laravel_app composer install --no-interaction --prefer-dist --optimize-autoloader
             docker exec laravel_app php artisan config:cache
             docker exec laravel_app php artisan route:cache
             docker exec laravel_app php artisan migrate --force
