@@ -32,6 +32,7 @@ jobs:
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ${{ secrets.EC2_PATH }}
+            git config --global --add safe.directory /var/www
             git pull origin main
             docker-compose down
             docker-compose up -d --build
