@@ -37,6 +37,7 @@ jobs:
             docker-compose down
             docker-compose up -d --build
             docker-compose exec -T app composer install --no-interaction --prefer-dist --optimize-autoloader
+            docker-compose exec -T app rm -rf storage/api-docs
             docker-compose exec -T app php artisan l5-swagger:generate
             docker-compose exec -T app php artisan config:clear
             docker-compose exec -T app php artisan route:clear
