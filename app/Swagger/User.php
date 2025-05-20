@@ -100,8 +100,7 @@ namespace App\Swagger;
  *         @OA\JsonContent(
  *             @OA\Property(property="success", type="boolean", example=false),
  *             @OA\Property(property="status", type="integer", example=500),
- *             @OA\Property(property="message", type="string", example="登出失敗"),
- *             @OA\Property(property="data", type="string", example=null, nullable=true)
+ *      
  *         )
  *     )
  * )
