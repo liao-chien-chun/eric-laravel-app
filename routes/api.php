@@ -19,13 +19,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/testhaha', function () {
-    return response()->json([
-        'success' => true,
-        'stauts' => 200
-    ]);
-});
-
 Route::prefix('user')->group(function () {
     // 使用者註冊
     Route::post('/register', [UserController::class, 'register']);
