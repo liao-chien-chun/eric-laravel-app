@@ -27,7 +27,7 @@ class Handler extends ExceptionHandler
         return response()->json([
             'success' => false,
             'status' => 401,
-            'message' => '未授權，請重新登入',
+            'message' => '尚未授權，請登入',
             'data' => null
         ], 401);
     }
