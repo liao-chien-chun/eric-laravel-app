@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
 Route::prefix('user')->group(function () {
     // 使用者註冊
     Route::post('/register', [UserController::class, 'register']);
@@ -29,4 +31,10 @@ Route::prefix('user')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('/logout', [UserController::class, 'logout']);
     });
+});
+
+// 文章
+Route::middleware('auth:api')->prefix('posts')->group(function () {
+    // 新增文章
+    Route::post('/', [PostController::class, 'store']);
 });
