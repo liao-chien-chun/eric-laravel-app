@@ -1,12 +1,9 @@
 name: Laravel CI
 
 on:
-  push:
-    branches:
-      - '**' # 不限任何分支 push 都會觸發
   pull_request:
     branches:
-      - '**' # 不限任何 PR 分支也會觸發
+      - main # 發起 PR 至 main 分支時觸發
 
 jobs:
   ci-check:
