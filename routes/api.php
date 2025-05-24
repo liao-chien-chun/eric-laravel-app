@@ -37,4 +37,6 @@ Route::prefix('user')->group(function () {
 Route::middleware('auth:api')->prefix('posts')->group(function () {
     // 新增文章
     Route::post('/', [PostController::class, 'store']);
+    // 更新文章
+    Route::PUT('/{id}', [PostController::class, 'update']);
 });
