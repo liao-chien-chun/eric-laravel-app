@@ -21,4 +21,28 @@ class PostRepository
     {
         return Post::create($data);
     }
+
+    /**
+     * 依 ID 取得單篇文章
+     * 
+     * @param int $id 
+     * @return Post
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function findPostById(int $id): Post
+    {
+        return Post::findOrFail($id);
+    }
+
+    /**
+     * 更新文章
+     * 
+     * @param Post $post 
+     * @param array $data 
+     * @return bool
+     */
+    public function updatePost(Post $post, array $data): bool
+    {
+        return $post->update($data);
+    }
 }
