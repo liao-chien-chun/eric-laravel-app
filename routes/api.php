@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\CommentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,10 +34,16 @@ Route::prefix('user')->group(function () {
     });
 });
 
-// 文章
-Route::middleware('auth:api')->prefix('posts')->group(function () {
-    // 新增文章
-    Route::post('/', [PostController::class, 'store']);
-    // 更新文章
-    Route::PUT('/{id}', [PostController::class, 'update']);
+// 要驗證的
+Route::middleware('auth:api')->group(function () {
+    // 文章
+    Route::prefix('posts')->group(function () {
+        // 新增文章
+        Route::post('/', [PostController::class, 'store']);
+        // 更新文章
+        Route::PUT('/{post}', [PostController::class, 'update']);
+
+        // 對文章新增留言
+        Route::post('/{post}/comments', [CommentController::class, 'store']);
+    });
 });

@@ -75,7 +75,7 @@ namespace App\Swagger;
  * ),
  * 
  * @OA\Put(
- *     path="/api/posts/{id}",
+ *     path="/api/posts/{post}",
  *     summary="更新文章",
  *     tags={"Post"},
  *     description="已登入使用者可更新自己建立的文章。若文章狀態已發布，則無法改為草稿。",
@@ -83,7 +83,7 @@ namespace App\Swagger;
  *     security={{"bearerAuth":{}}},
  *  
  *     @OA\Parameter(
- *         name="id",
+ *         name="post",
  *         in="path",
  *         description="文章 ID",
  *         required=true,
