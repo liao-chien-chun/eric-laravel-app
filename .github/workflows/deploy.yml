@@ -42,7 +42,7 @@ jobs:
             docker-compose up -d --build
 
             echo " 等待 app 容器啟動..."
-            until docker compose exec -T app test -f artisan; do
+            until docker-compose exec -T app test -f artisan; do
               echo "等待容器啟動中..."
               sleep 5
             done
