@@ -5,22 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model
+class Comment extends Model
 {
     use HasFactory;
 
-    /**
-     * 可被批量指派的欄位
-     */
     protected $fillable = [
+        'post_id',
         'user_id',
-        'title',
         'content',
-        'status'
     ];
 
     /**
-     * 一篇文章屬於一個使用者
+     * 一個留言屬於一個使用者
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -30,12 +26,12 @@ class Post extends Model
     }
 
     /**
-     * 一個文章有多個留言
+     * 一個留言屬於一篇文章
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function comments()
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function post()
     {
-        return $this->hasMany(Comment::class);
+        return $this->belongsTo(Post::class);
     }
 }
