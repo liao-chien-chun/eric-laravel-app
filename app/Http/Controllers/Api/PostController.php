@@ -74,7 +74,7 @@ class PostController extends Controller
             return response()->json([
                 'success' => false,
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => '找不到該文章',
+                'message' => $e->getMessage(),
                 'data' => null
             ], Response::HTTP_NOT_FOUND);
         } catch (AuthorizationException $e) {
