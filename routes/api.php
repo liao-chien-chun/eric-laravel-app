@@ -45,5 +45,7 @@ Route::middleware('auth:api')->group(function () {
 
         // 對文章新增留言
         Route::post('/{post}/comments', [CommentController::class, 'store']);
+        // 修改留言
+        Route::PUT('/{post}/comments/{comment}', [CommentController::class, 'update']);
     });
 });

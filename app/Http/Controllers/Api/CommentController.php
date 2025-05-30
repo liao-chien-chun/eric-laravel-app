@@ -58,4 +58,47 @@ class CommentController extends Controller
             ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * 修改文章留言
+     * 
+     * @param StoreCommentRequest $request
+     * @param int $postId
+     * @param int $commentId
+     * @return JsonResponse
+     */
+    public function update(StoreCommentRequest $request, int $postId, int $commentId): JsonResponse
+    {
+        try {
+            $comment = $this->commentService->updateComment($postId, $commentId, $request->validated());
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '修改留言成功',
+                'data' => new CommentResource($comment)
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND, );
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_FORBIDDEN); 
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => '伺服器錯誤，請稍後再試',
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

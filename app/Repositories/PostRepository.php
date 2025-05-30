@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Post;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Class PostRepository
@@ -31,7 +32,13 @@ class PostRepository
      */
     public function findPostById(int $id): Post
     {
-        return Post::findOrFail($id);
+        // return Post::findOrFail($id);
+
+        try {
+            return Post::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            throw new ModelNotFoundException("找不到該文章");
+        }
     }
 
     /**
