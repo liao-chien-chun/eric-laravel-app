@@ -43,14 +43,9 @@ jobs:
             docker-compose down
             docker-compose up -d --build
 
-            echo " 快取與設定清理..."
-            docker-compose exec -T app php artisan config:clear
-            docker-compose exec -T app php artisan route:clear
-            docker-compose exec -T app php artisan config:cache
-            docker-compose exec -T app php artisan route:cache
+            echo "設定 deploy.sh 執行權限..."
+            chmod +x deploy.sh
 
-            echo " 執行 migrate..."
-            docker-compose exec -T app php artisan migrate --force
-
-            echo "部署完成！"
+            echo "執行 deploy.sh 部署腳本..."
+            ./deploy.sh
           EOF
