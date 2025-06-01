@@ -31,6 +31,8 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -x  
+
             cd ${{ secrets.EC2_PATH }}
 
             echo " 拉取最新程式碼..."
@@ -41,7 +43,8 @@ jobs:
             docker-compose down
             docker-compose up -d --build
 
-            docker-compose exec -T app git config --global --add safe.directory /var/www
+            echo " 設定 Git 安全目錄..."
+            docker-compose exec -T app sh -c "git config --global --add safe.directory /var/www && echo OK"
 
             echo " 安裝 Composer 套件..."
             docker-compose exec -T app composer install --no-interaction --prefer-dist --optimize-autoloader
