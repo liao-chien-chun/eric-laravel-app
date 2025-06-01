@@ -46,9 +46,6 @@ jobs:
             echo " 設定 Git 安全目錄..."
             docker-compose exec -T app sh -c "git config --global --add safe.directory /var/www && echo OK"
 
-            echo " 安裝 Composer 套件..."
-            docker-compose exec -T app composer install --no-interaction --prefer-dist --optimize-autoloader
-
             echo " 設定 Swagger 權限與生成文件..."
             docker-compose exec -T app chown -R www-data:www-data storage/api-docs
             docker-compose exec -T app chmod -R 775 storage/api-docs
@@ -62,6 +59,10 @@ jobs:
 
             echo " 執行 migrate..."
             docker-compose exec -T app php artisan migrate --force
+
+
+            echo " 安裝 Composer 套件..."
+            docker-compose exec -T app composer install --no-interaction --prefer-dist --optimize-autoloader
 
             echo "部署完成！"
           EOF
