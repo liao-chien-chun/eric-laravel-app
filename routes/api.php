@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\ShortUrlController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,5 +48,15 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{post}/comments', [CommentController::class, 'store']);
         // 修改留言
         Route::PUT('/{post}/comments/{comment}', [CommentController::class, 'update']);
+    });
+
+    // 短網址
+    Route::prefix('short-urls')->group(function () {
+        // 取得我的短網址清單
+        Route::get('/', [ShortUrlController::class, 'index']);
+        // 建立短網址(可自訂 short_code)
+        Route::post('/', [ShortUrlController::class, 'store']);
+        // 刪除(只能刪除自己的)
+        Route::delete('/{id}', [ShortUrlController::class, 'destroy']);
     });
 });
