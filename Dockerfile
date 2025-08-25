@@ -9,7 +9,10 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip unzip git curl \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
+    # 安裝 Redis 擴展
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # 從官方 composer image 直接複製 composer 可執行檔進來。
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
