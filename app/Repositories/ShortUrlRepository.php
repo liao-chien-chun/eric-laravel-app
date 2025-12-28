@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\ShortUrl;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 
 class ShortUrlRepository
@@ -43,5 +44,32 @@ class ShortUrlRepository
         return ShortUrl::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
+    }
+
+    /**
+     * 根據 ID 查找短網址
+     *
+     * @param int $id 短網址 ID
+     * @return ShortUrl
+     * @throws ModelNotFoundException
+     */
+    public function findById(int $id): ShortUrl
+    {
+        try {
+            return ShortUrl::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            throw new ModelNotFoundException("找不到該短網址");
+        }
+    }
+
+    /**
+     * 刪除短網址
+     *
+     * @param ShortUrl $shortUrl
+     * @return bool
+     */
+    public function delete(ShortUrl $shortUrl): bool
+    {
+        return $shortUrl->delete();
     }
 }
