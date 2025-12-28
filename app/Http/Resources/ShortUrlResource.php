@@ -20,6 +20,7 @@ class ShortUrlResource extends JsonResource
         return [
             'id' => $this->id,
             'short_code' => $this->short_code,
+            'short_url' => url('/r/' . $this->short_code),
             'original_url' => $this->original_url,
             'click_count' => $this->click_count,
             'expired_at'   => $this->formatDateTime($this->expired_at),

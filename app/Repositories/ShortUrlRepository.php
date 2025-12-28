@@ -72,4 +72,26 @@ class ShortUrlRepository
     {
         return $shortUrl->delete();
     }
+
+    /**
+     * 根據短碼查找短網址
+     *
+     * @param string $code 短碼
+     * @return ShortUrl|null
+     */
+    public function findByCode(string $code): ?ShortUrl
+    {
+        return ShortUrl::where('short_code', $code)->first();
+    }
+
+    /**
+     * 增加點擊次數（透過 ID）
+     *
+     * @param int $id 短網址 ID
+     * @return bool
+     */
+    public function incrementClickCount(int $id): bool
+    {
+        return ShortUrl::where('id', $id)->increment('click_count') > 0;
+    }
 }

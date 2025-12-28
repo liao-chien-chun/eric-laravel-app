@@ -7,6 +7,7 @@ use App\Http\Requests\StoreShortUrlRequest;
 use App\Http\Resources\ShortUrlResource;
 use App\Services\ShortUrlService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Exception;
@@ -123,6 +124,25 @@ class ShortUrlController extends Controller
                 'message' => '伺服器錯誤，請稍後再試',
                 'data' => null
             ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 根據短碼重定向到原始 URL
+     * @param string $code 短碼
+     * @return RedirectResponse
+     */
+    public function redirect(string $code): RedirectResponse
+    {
+        try {
+            $originalUrl = $this->shortUrlService->redirect($code);
+
+            return redirect()->away($originalUrl, Response::HTTP_MOVED_PERMANENTLY);
+        } catch (Exception $e) {
+            $statusCode = $e->getCode() ?: Response::HTTP_NOT_FOUND;
+
+            // 返回錯誤頁面或 JSON（根據需求）
+            abort($statusCode, $e->getMessage());
         }
     }
 }
