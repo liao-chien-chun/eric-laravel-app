@@ -10,6 +10,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Auth\Access\AuthorizationException;
 
 /**
  * 短網址 API 控制器 (受 JWT 保護)
@@ -79,6 +81,46 @@ class ShortUrlController extends Controller
                 'success' => false,
                 'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => $e->getMessage(),
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 刪除短網址（僅所有者可刪除）
+     * @param int $id 短網址 ID
+     * @return JsonResponse
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        try {
+            $this->shortUrlService->delete($id);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '短網址刪除成功',
+                'data' => null
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_FORBIDDEN);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => '伺服器錯誤，請稍後再試',
                 'data' => null
             ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
         }

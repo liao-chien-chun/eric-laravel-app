@@ -6,6 +6,7 @@ use App\Models\ShortUrl;
 use App\Repositories\ShortUrlRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -142,6 +143,25 @@ class ShortUrlService
     public function getMyShortUrls(int $userId, int $perPage = 15): LengthAwarePaginator
     {
         return $this->shortUrlRepository->getUserShortUrls($userId, $perPage);
+    }
+
+    /**
+     * 刪除短網址
+     *
+     * @param int $id 短網址 ID
+     * @return void
+     * @throws Exception
+     */
+    public function delete(int $id): void
+    {
+        $shortUrl = $this->shortUrlRepository->findById($id);
+
+        Gate::authorize('delete', $shortUrl);
+
+        $this->shortUrlRepository->delete($shortUrl);
+
+        // 清除快取
+        Cache::forget(self::CACHE_KEY_CODE_PREFIX . $shortUrl->short_code);
     }
 
     /**

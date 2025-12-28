@@ -193,6 +193,77 @@ namespace App\Swagger;
  *             @OA\Property(property="errors",  type="string",  nullable=true, example=null)
  *         )
  *     )
+ * ),
+ *
+ * @OA\Delete(
+ *     path="/api/short-urls/{id}",
+ *     summary="刪除短網址",
+ *     tags={"ShortUrl"},
+ *     description="已登入使用者可刪除自己建立的短網址",
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         description="短網址 ID",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="短網址刪除成功",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="status",  type="integer", example=200),
+ *             @OA\Property(property="message", type="string",  example="短網址刪除成功"),
+ *             @OA\Property(property="data",    type="null",    example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=401,
+ *         description="尚未授權，請登入（無效的JWT）",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status",  type="integer", example=401),
+ *             @OA\Property(property="message", type="string",  example="尚未授權，請登入"),
+ *             @OA\Property(property="data",    type="null",    example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=403,
+ *         description="無權限刪除該短網址（不是擁有者）",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status",  type="integer", example=403),
+ *             @OA\Property(property="message", type="string",  example="無權限刪除該短網址"),
+ *             @OA\Property(property="data",    type="null",    example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=404,
+ *         description="找不到該短網址",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status",  type="integer", example=404),
+ *             @OA\Property(property="message", type="string",  example="找不到該短網址"),
+ *             @OA\Property(property="data",    type="null",    example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=500,
+ *         description="系統錯誤",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status",  type="integer", example=500),
+ *             @OA\Property(property="message", type="string",  example="伺服器錯誤，請稍後再試"),
+ *             @OA\Property(property="data",    type="null",    example=null)
+ *         )
+ *     )
  * )
  */
 

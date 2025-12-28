@@ -10,8 +10,8 @@ namespace App\Swagger;
  *         description="這是 API 文件",
  *     ),
  *     @OA\Server(
- *         description="主要服務器",
- *         url="http://localhost:8080"
+ *         description="API Server",
+ *         url=L5_SWAGGER_CONST_API_URL
  *     )
  * )
  * 
