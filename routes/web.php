@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ShortUrlController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// 短網址重定向（公開路由）
+Route::get('/r/{code}', [ShortUrlController::class, 'redirect'])->name('short-url.redirect');

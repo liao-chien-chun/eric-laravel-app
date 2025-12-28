@@ -165,6 +165,63 @@ class ShortUrlService
     }
 
     /**
+     * 根據短碼重定向到原始 URL
+     *
+     * @param string $code 短碼
+     * @return string 原始 URL
+     * @throws Exception
+     */
+    public function redirect(string $code): string
+    {
+        $cacheKey = self::CACHE_KEY_CODE_PREFIX . $code;
+
+        // 嘗試從快取取得
+        $shortUrl = Cache::get($cacheKey);
+
+        // 快取未命中
+        if ($shortUrl === null) {
+            // 使用鎖防止快取擊穿
+            $lock = Cache::lock('lock:' . $cacheKey, 10);
+
+            try {
+                $lock->block(5);
+
+                // 雙重檢查（其他執行緒可能已經寫入快取）
+                $shortUrl = Cache::get($cacheKey);
+
+                if ($shortUrl === null) {
+                    $shortUrl = $this->shortUrlRepository->findByCode($code);
+
+                    if ($shortUrl) {
+                        // 找到資料，快取 1 小時
+                        Cache::put($cacheKey, $shortUrl, 3600);
+                    } else {
+                        // 防止快取穿透：快取空值 5 分鐘
+                        Cache::put($cacheKey, false, 300);
+                    }
+                }
+            } finally {
+                $lock->release();
+            }
+        }
+
+        // 處理查不到的情況
+        if ($shortUrl === false) {
+            throw new Exception('短網址不存在', 404);
+        }
+
+        // 檢查是否過期
+        if ($shortUrl->expired_at && now()->isAfter($shortUrl->expired_at)) {
+            throw new Exception('短網址已過期', 410);
+        }
+
+        // 同步增加點擊次數
+        $this->shortUrlRepository->incrementClickCount($shortUrl->id);
+
+        return $shortUrl->original_url;
+    }
+
+    /**
      * 快取短碼對應資料
      *
      * @param ShortUrl $short 模型
