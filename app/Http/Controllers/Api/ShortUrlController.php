@@ -21,6 +21,43 @@ class ShortUrlController extends Controller
     ) {}
 
     /**
+     * 取得我的短網址清單
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $userId = (int) auth()->id();
+            $perPage = (int) $request->query('per_page', 15);
+
+            $shortUrls = $this->shortUrlService->getMyShortUrls($userId, $perPage);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '短網址清單取得成功',
+                'data' => [
+                    'items' => ShortUrlResource::collection($shortUrls->items()),
+                    'pagination' => [
+                        'current_page' => $shortUrls->currentPage(), // 目前第幾頁
+                        'per_page' => $shortUrls->perPage(), // 一頁有幾筆資料
+                        'total' => $shortUrls->total(), // 全部資料總筆數
+                        'last_page' => $shortUrls->lastPage(), // 最後一頁是第幾頁
+                    ],
+                ],
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * 建立短網址
      * @param StoreShortUrlRequest $request 驗證後請求
      * @return JsonResponse

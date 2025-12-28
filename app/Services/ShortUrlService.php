@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ShortUrl;
 use App\Repositories\ShortUrlRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
@@ -129,6 +130,18 @@ class ShortUrlService
             $num = intdiv($num, 62);
         }
         return $out ?: '0';
+    }
+
+    /**
+     * 取得我的短網址清單
+     *
+     * @param int $userId 使用者 ID
+     * @param int $perPage 每頁筆數
+     * @return LengthAwarePaginator
+     */
+    public function getMyShortUrls(int $userId, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->shortUrlRepository->getUserShortUrls($userId, $perPage);
     }
 
     /**
