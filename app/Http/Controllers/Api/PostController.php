@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\GetUserPostsRequest;
+use App\Http\Requests\UpdatePostStatusRequest;
 use App\Http\Resources\PostResource;
 use App\Services\PostService;
 use Illuminate\Support\Facades\Auth;
@@ -138,6 +139,90 @@ class PostController extends Controller
                 'success' => false,
                 'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => '伺服器錯誤，請稍後再試',
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 刪除文章
+     *
+     * @param int $id 文章 ID（路由參數）
+     * @return JsonResponse
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        try {
+            $this->postService->deletePost($id);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '文章刪除成功',
+                'data' => null
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_FORBIDDEN);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => '伺服器錯誤，請稍後再試',
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 更新文章狀態
+     *
+     * @param UpdatePostStatusRequest $request 驗證後的請求資料
+     * @param int $id 文章 ID（路由參數）
+     * @return JsonResponse
+     */
+    public function updateStatus(UpdatePostStatusRequest $request, int $id): JsonResponse
+    {
+        try {
+            $validated = $request->validated();
+            $post = $this->postService->updatePostStatus($id, $validated['status']);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '文章狀態更新成功',
+                'data' => new PostResource($post)
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_FORBIDDEN);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => $e->getMessage(),
                 'data' => null
             ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
         }

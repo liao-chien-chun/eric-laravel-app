@@ -47,6 +47,10 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [PostController::class, 'store']);
         // 更新文章
         Route::PUT('/{post}', [PostController::class, 'update']);
+        // 刪除文章
+        Route::delete('/{post}', [PostController::class, 'destroy']);
+        // 更新文章狀態
+        Route::patch('/{post}/status', [PostController::class, 'updateStatus']);
 
         // 對文章新增留言
         Route::post('/{post}/comments', [CommentController::class, 'store']);

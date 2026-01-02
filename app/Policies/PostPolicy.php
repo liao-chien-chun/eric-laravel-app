@@ -45,11 +45,16 @@ class PostPolicy
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * 判斷使用者是否可以刪除文章
+     * 只有文章作者本人可以刪除
+     *
+     * @param User $user
+     * @param Post $post
+     * @return bool
      */
     public function delete(User $user, Post $post): bool
     {
-        //
+        return $user->id === $post->user_id;
     }
 
     /**
