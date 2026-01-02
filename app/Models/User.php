@@ -58,11 +58,21 @@ class User extends Authenticatable implements JWTSubject
 
     /**
      * 一個使用者有多個留言
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * 一個使用者有多篇文章
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 }

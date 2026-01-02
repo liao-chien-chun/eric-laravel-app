@@ -43,13 +43,30 @@ class PostRepository
 
     /**
      * 更新文章
-     * 
-     * @param Post $post 
-     * @param array $data 
+     *
+     * @param Post $post
+     * @param array $data
      * @return bool
      */
     public function updatePost(Post $post, array $data): bool
     {
         return $post->update($data);
+    }
+
+    /**
+     * 取得使用者的文章列表（分頁）
+     *
+     * @param int $userId 使用者 ID
+     * @param int $status 文章狀態 (1:草稿, 2:發布, 3:隱藏)
+     * @param int $perPage 每頁筆數，預設 15
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getUserPosts(int $userId, int $status, int $perPage = 15)
+    {
+        return Post::where('user_id', $userId)
+            ->where('status', $status)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
     }
 }

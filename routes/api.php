@@ -29,6 +29,10 @@ Route::prefix('user')->group(function () {
     // 使用者登入
     Route::post('/login', [UserController::class, 'login']);
 
+    // 取得使用者的文章列表（公開，任何人可訪問已發佈文章，草稿和隱藏需要本人登入）
+    Route::get('/{user}/posts', [PostController::class, 'getUserPosts'])
+        ->middleware('optional.auth');
+
     // 使用者登出
     Route::middleware('auth:api')->group(function () {
         Route::post('/logout', [UserController::class, 'logout']);
