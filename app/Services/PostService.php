@@ -65,4 +65,24 @@ class PostService
 
         return $post->load('user');
     }
+
+    /**
+     * 取得使用者的文章列表（分頁）
+     *
+     * @param int $userId 使用者 ID
+     * @param int $status 文章狀態 (1:草稿, 2:發布, 3:隱藏)
+     * @param int $perPage 每頁筆數，預設 15
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @throws AuthorizationException 當沒有權限查看指定狀態的文章時
+     */
+    public function getUserPosts(int $userId, int $status, int $perPage = 15)
+    {
+        // 使用 Policy 檢查權限
+        // 草稿(1) 和隱藏(3) 只有本人可以查看
+        if (Gate::denies('viewUserPosts', [Post::class, $userId, $status])) {
+            throw new AuthorizationException('你沒有權限查看此內容');
+        }
+
+        return $this->postRepository->getUserPosts($userId, $status, $perPage);
+    }
 }
