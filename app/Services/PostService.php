@@ -85,4 +85,74 @@ class PostService
 
         return $this->postRepository->getUserPosts($userId, $status, $perPage);
     }
+
+    /**
+     * 刪除文章
+     *
+     * @param int $id 文章 ID
+     * @return bool
+     * @throws AuthorizationException
+     * @throws ModelNotFoundException
+     */
+    public function deletePost(int $id): bool
+    {
+        $post = $this->postRepository->findPostById($id);
+
+        // 使用 Policy 檢查權限
+        if (Gate::denies('delete', $post)) {
+            throw new AuthorizationException('你沒有權限刪除該文章');
+        }
+
+        return $this->postRepository->deletePost($post);
+    }
+
+    /**
+     * 更新文章狀態
+     *
+     * @param int $id 文章 ID
+     * @param int $status 新的狀態
+     * @return Post
+     * @throws AuthorizationException
+     * @throws ModelNotFoundException
+     * @throws \Exception 當狀態轉換不合法時
+     */
+    public function updatePostStatus(int $id, int $status): Post
+    {
+        $post = $this->postRepository->findPostById($id);
+
+        // 使用 Policy 檢查權限（使用 update 權限）
+        if (Gate::denies('update', $post)) {
+            throw new AuthorizationException('你沒有權限修改該文章');
+        }
+
+        // 驗證狀態轉換規則
+        $currentStatus = $post->status;
+
+        // 不允許狀態保持不變
+        if ($currentStatus === $status) {
+            throw new \Exception('新狀態與目前狀態相同', 422);
+        }
+
+        // 狀態轉換規則：
+        // 草稿(1) → 只能變成發布(2)
+        // 發布(2) → 只能變成隱藏(3)
+        // 隱藏(3) → 只能變成發布(2)
+        $validTransitions = [
+            1 => [2], // 草稿只能變成發布
+            2 => [3], // 發布只能變成隱藏
+            3 => [2], // 隱藏只能變成發布
+        ];
+
+        if (!in_array($status, $validTransitions[$currentStatus])) {
+            $statusNames = [1 => '草稿', 2 => '發布', 3 => '隱藏'];
+            throw new \Exception(
+                "不允許將文章從「{$statusNames[$currentStatus]}」狀態變更為「{$statusNames[$status]}」狀態",
+                422
+            );
+        }
+
+        $this->postRepository->updatePostStatus($post, $status);
+
+        return $post->fresh()->load('user');
+    }
 }

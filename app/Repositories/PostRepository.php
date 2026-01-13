@@ -69,4 +69,27 @@ class PostRepository
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
+
+    /**
+     * 刪除文章
+     *
+     * @param Post $post
+     * @return bool|null
+     */
+    public function deletePost(Post $post): ?bool
+    {
+        return $post->delete();
+    }
+
+    /**
+     * 更新文章狀態
+     *
+     * @param Post $post
+     * @param int $status 新的狀態 (1:草稿, 2:發布, 3:隱藏)
+     * @return bool
+     */
+    public function updatePostStatus(Post $post, int $status): bool
+    {
+        return $post->update(['status' => $status]);
+    }
 }
