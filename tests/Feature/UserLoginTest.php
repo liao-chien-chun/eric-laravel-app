@@ -23,10 +23,10 @@ class UserLoginTest extends TestCase
      */
     public function test_user_can_login_successfully(): void
     {
-        // 先建立使用者
+        // 先建立使用者（不要手動 hash，Model 的 casts 會自動處理）
         User::factory()->create([
             'email' => 'test@example.com',
-            'password' => Hash::make('password123')
+            'password' => 'password123'  // 不要 Hash::make，讓 Model 自動處理
         ]);
 
         // Arrange 準備資料
@@ -105,10 +105,10 @@ class UserLoginTest extends TestCase
      */
     public function test_login_fails_with_wrong_password()
     {
-        // 建立使用者
+        // 建立使用者（不要手動 hash）
         User::factory()->create([
             'email' => 'test@example.com',
-            'password' => Hash::make('password123')
+            'password' => 'password123'  // Model 會自動 hash
         ]);
 
         $loginData = [
