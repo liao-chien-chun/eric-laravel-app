@@ -42,7 +42,7 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
-          php artisan jwt:secret
+          php artisan jwt:secret --force
 
       - name: Run Migrations
         env:

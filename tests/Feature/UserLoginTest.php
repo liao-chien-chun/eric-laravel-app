@@ -38,12 +38,6 @@ class UserLoginTest extends TestCase
         // Act 執行
         $response = $this->postJson('/api/user/login', $loginData);
 
-        // Debug: 顯示完整錯誤訊息（測試通過後可移除）
-        if ($response->status() !== 200) {
-            dump($response->json());
-            dump($response->getContent());
-        }
-
         // Assert 斷言
         $response->assertStatus(200) // 登入成功 200
             ->assertJson([
