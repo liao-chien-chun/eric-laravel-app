@@ -3,26 +3,41 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
+use App\Repositories\RoleRepository;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use App\Models\Role;
 use Exception;
 
 class UserService
 {
-    public function __construct(private UserRepository $userRepository) {}
+    public function __construct(
+        private UserRepository $userRepository,
+        private RoleRepository $roleRepository
+    ) {}
 
     /**
      * 註冊新使用者
-     * 
+     *
      * @param array{name: string, email: string, password: string, phone?: string|null} $data
-     * @return User 
+     * @return User
      * @throws Exception 註冊失敗拋出錯誤
      */
-    public function register(array $data): User 
+    public function register(array $data): User
     {
+        // 透過 RoleRepository 取得一般使用者角色
+        $userRole = $this->roleRepository->findByName(Role::USER);
+
+        if (!$userRole) {
+            throw new Exception('系統尚未初始化角色資料，請聯繫管理員', 500);
+        }
+
+        // 自動加入角色 ID
+        $data['role_id'] = $userRole->id;
+
         return $this->userRepository->createUser($data);
     }
 
