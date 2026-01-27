@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use App\Services\UserService;
 use App\Repositories\UserRepository;
+use App\Repositories\RoleRepository;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Exception;
@@ -41,14 +42,17 @@ class UserServiceTest extends TestCase
         ]);
 
         // 2. Mock UserRepository - 只 mock Repository，不 mock Facade
-        $mockRepository = Mockery::mock(UserRepository::class);
-        $mockRepository->shouldReceive('findByEmail')
+        $mockUserRepository = Mockery::mock(UserRepository::class);
+        $mockUserRepository->shouldReceive('findByEmail')
             ->once()
             ->with('test@example.com')
             ->andReturn($user);
 
-        // 3. 建立 UserService，注入 mock 的 Repository
-        $userService = new UserService($mockRepository);
+        // 3. Mock RoleRepository（login 方法不需要，但 constructor 需要）
+        $mockRoleRepository = Mockery::mock(RoleRepository::class);
+
+        // 4. 建立 UserService，注入 mock 的 Repository
+        $userService = new UserService($mockUserRepository, $mockRoleRepository);
 
         // === Act（執行）===
         $result = $userService->login([
@@ -72,13 +76,15 @@ class UserServiceTest extends TestCase
     public function test_login_throws_exception_when_user_not_found(): void
     {
         // Arrange
-        $mockRepository = Mockery::mock(UserRepository::class);
-        $mockRepository->shouldReceive('findByEmail')
+        $mockUserRepository = Mockery::mock(UserRepository::class);
+        $mockUserRepository->shouldReceive('findByEmail')
             ->once()
             ->with('notfound@example.com')
             ->andReturn(null);
 
-        $userService = new UserService($mockRepository);
+        $mockRoleRepository = Mockery::mock(RoleRepository::class);
+
+        $userService = new UserService($mockUserRepository, $mockRoleRepository);
 
         // Assert
         $this->expectException(Exception::class);
@@ -103,12 +109,14 @@ class UserServiceTest extends TestCase
             'password' => 'correct-password',
         ]);
 
-        $mockRepository = Mockery::mock(UserRepository::class);
-        $mockRepository->shouldReceive('findByEmail')
+        $mockUserRepository = Mockery::mock(UserRepository::class);
+        $mockUserRepository->shouldReceive('findByEmail')
             ->once()
             ->andReturn($user);
 
-        $userService = new UserService($mockRepository);
+        $mockRoleRepository = Mockery::mock(RoleRepository::class);
+
+        $userService = new UserService($mockUserRepository, $mockRoleRepository);
 
         // Assert
         $this->expectException(Exception::class);

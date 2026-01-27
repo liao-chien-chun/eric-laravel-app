@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
+use App\Models\Role;
 
 /**
  * 使用者註冊 API 測試
@@ -18,6 +19,22 @@ class UserRegistrationTest extends TestCase
      * 確保測試之間互不影響
      */
     use RefreshDatabase;
+
+    /**
+     * 每個測試前執行
+     * 建立必要的角色資料
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // 建立一般使用者角色（註冊功能需要）
+        Role::create([
+            'name' => Role::USER,
+            'display_name' => '一般使用者',
+            'description' => '一般註冊使用者',
+        ]);
+    }
 
     /**
      * 測試：使用者可以成功註冊
