@@ -35,7 +35,8 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
-        'phone'
+        'phone',
+        'role_id'
     ];
 
     /**
@@ -74,5 +75,46 @@ class User extends Authenticatable implements JWTSubject
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    /**
+     * 一個使用者屬於一個角色
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * 檢查使用者是否為管理者
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role && $this->role->name === Role::ADMIN;
+    }
+
+    /**
+     * 檢查使用者是否為一般使用者
+     *
+     * @return bool
+     */
+    public function isUser(): bool
+    {
+        return $this->role && $this->role->name === Role::USER;
+    }
+
+    /**
+     * 檢查使用者是否有指定角色
+     *
+     * @param string $roleName
+     * @return bool
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->role && $this->role->name === $roleName;
     }
 }

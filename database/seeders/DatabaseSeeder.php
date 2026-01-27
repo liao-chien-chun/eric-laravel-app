@@ -12,11 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // 1. 先建立角色資料（基礎資料）
+        $this->call(RolesTableSeeder::class);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // 2. 再建立管理員帳號（依賴角色資料）
+        $this->call(AdminUserSeeder::class);
+
+        $this->command->info('所有種子資料建立完成！');
     }
 }
