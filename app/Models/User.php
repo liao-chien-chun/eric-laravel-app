@@ -78,6 +78,16 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * 一個使用者有多個商品
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function items()
+    {
+        return $this->hasMany(Item::class);
+    }
+
+    /**
      * 一個使用者屬於一個角色
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

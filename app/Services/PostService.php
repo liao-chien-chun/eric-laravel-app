@@ -28,6 +28,7 @@ class PostService
     public function createPost(array $data): Post
     {
         // 加上目前使用者 id
+        // 簡潔，Laravel 會自動選擇當前 guard
         $data['user_id'] = Auth::id();
 
         $post = $this->postRepository->createPost($data);

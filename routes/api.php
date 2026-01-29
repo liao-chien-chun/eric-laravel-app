@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ShortUrlController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,14 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{post}/comments', [CommentController::class, 'store']);
         // 修改留言
         Route::PUT('/{post}/comments/{comment}', [CommentController::class, 'update']);
+    });
+
+    // 管理者才能做的
+    Route::middleware('admin')->group(function () {
+        // 商品
+        Route::prefix('items')->group(function () {
+            Route::post('/', [ItemController::class, 'store']);
+        });
     });
 
     // 短網址
