@@ -12,7 +12,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // 每天 00:00 同步上架商品到 Elasticsearch
+        $schedule->command('es:sync-items')
+            ->dailyAt('00:00')
+            // ->everyMinute()   // 測試用每分鐘
+            ->withoutOverlapping()  // 避免重複執行
+            ->onOneServer()         // 多伺服器環境下只在一台執行
+            ->runInBackground();    // 背景執行
     }
 
     /**
