@@ -46,6 +46,8 @@ services:
     container_name: redis 
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     
   # Nginx 服務
   nginx:
@@ -75,8 +77,11 @@ services:
       # JVM 記憶體
       - ES_JAVA_OPTS=-Xms${ES_HEAP_SIZE:-512m} -Xmx${ES_HEAP_SIZE:-512m}
 
+      - network.host=0.0.0.0
+      - http.host=0.0.0.0
+
       # 設定 bootstrap password（正式環境必須）
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      # - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     ports:
       - "${ES_PORT:-9200}:9200"
     volumes:
@@ -113,4 +118,5 @@ services:
 # 定義 volume
 volumes:
   db_data:
+  redis_data:
   es_data:  # ES 資料持久化
