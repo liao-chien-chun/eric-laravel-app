@@ -1,5 +1,5 @@
 # 工作流程的名稱（會顯示在 GitHub Actions 的畫面上）
-name: Deploy to EC2 
+name: Deploy to GCP
 
 # 當有人 push 到 main 分支時，就會觸發這個 workflow
 on:
@@ -10,7 +10,7 @@ on:
 jobs:
   deploy:
     # 工作名稱
-    name: Deploy Laravel Project to EC2
+    name: Deploy Laravel Project to GCP
     # 指定 GitHub runner 執行環境（使用 Ubuntu）
     runs-on: ubuntu-latest
 
@@ -40,8 +40,8 @@ jobs:
             git pull origin main
 
             echo " 重建並啟動 Docker 容器..."
-            docker-compose down
-            docker-compose up -d --build
+            docker compose down
+            docker compose up -d --build
 
             echo "設定 deploy.sh 執行權限..."
             chmod +x deploy.sh
