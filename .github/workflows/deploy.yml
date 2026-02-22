@@ -1,5 +1,5 @@
 # 工作流程的名稱（會顯示在 GitHub Actions 的畫面上）
-name: Deploy to EC2 
+name: Deploy to GCP
 
 # 當有人 push 到 main 分支時，就會觸發這個 workflow
 on:
@@ -10,7 +10,7 @@ on:
 jobs:
   deploy:
     # 工作名稱
-    name: Deploy Laravel Project to EC2
+    name: Deploy Laravel Project to GCP
     # 指定 GitHub runner 執行環境（使用 Ubuntu）
     runs-on: ubuntu-latest
 
@@ -23,25 +23,25 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.GCP_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.GCP_HOST }} >> ~/.ssh/known_hosts
 
       # SSH 登入 EC2 並執行部署指令
       - name: Deploy via SSH
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} << 'EOF'
             set -e  
 
-            cd ${{ secrets.EC2_PATH }}
+            cd ${{ secrets.GCP_PATH }}
 
             echo " 拉取最新程式碼..."
-            git config --global --add safe.directory /var/www
+            git config --global --add safe.directory ${{ secrets.GCP_PATH }}
             git pull origin main
 
             echo " 重建並啟動 Docker 容器..."
-            docker-compose down
-            docker-compose up -d --build
+            docker compose down
+            docker compose up -d --build
 
             echo "設定 deploy.sh 執行權限..."
             chmod +x deploy.sh
