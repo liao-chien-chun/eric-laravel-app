@@ -23,20 +23,20 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.GCP_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.GCP_HOST }} >> ~/.ssh/known_hosts
 
       # SSH 登入 EC2 並執行部署指令
       - name: Deploy via SSH
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} << 'EOF'
             set -e  
 
-            cd ${{ secrets.EC2_PATH }}
+            cd ${{ secrets.GCP_PATH }}
 
             echo " 拉取最新程式碼..."
-            git config --global --add safe.directory /var/www
+            git config --global --add safe.directory ${{ secrets.GCP_PATH }}
             git pull origin main
 
             echo " 重建並啟動 Docker 容器..."
