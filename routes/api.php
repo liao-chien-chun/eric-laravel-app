@@ -69,6 +69,9 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('admin')->group(function () {
         // 商品
         Route::prefix('items')->group(function () {
+            // 取得商品列表
+            Route::get('/', [ItemController::class, 'index']);
+            // 建立商品
             Route::post('/', [ItemController::class, 'store']);
         });
     });

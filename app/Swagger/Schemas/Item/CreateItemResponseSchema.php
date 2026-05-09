@@ -18,6 +18,7 @@ namespace App\Swagger\Schemas\Item;
  *         @OA\Property(property="price", type="integer", example=35900),
  *         @OA\Property(property="stock", type="integer", example=100),
  *         @OA\Property(property="status", type="integer", example=2, description="1:草稿 2:上架 3:下架"),
+ *         @OA\Property(property="status_text", type="string", example="上架"),
  *         @OA\Property(property="image", type="string", nullable=true, example="/images/iphone15pro.jpg"),
  *         @OA\Property(
  *             property="user",

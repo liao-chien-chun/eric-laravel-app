@@ -39,4 +39,17 @@ class ItemService
         // 預載建立者資訊
         return $item->load('user');
     }
+
+    /**
+     * 取得指定狀態的商品列表（分頁）
+     * 用於後台管理者查詢
+     *
+     * @param int $status 商品狀態 (1:草稿, 2:上架, 3:下架)
+     * @param int $perPage 每頁筆數，預設 15
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getItemsByStatus(int $status, int $perPage = 15)
+    {
+        return $this->itemRepository->getItemsByStatus($status, $perPage);
+    }
 }
