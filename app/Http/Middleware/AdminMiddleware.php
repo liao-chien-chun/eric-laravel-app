@@ -15,8 +15,11 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        /** @var \App\Models\User $user */
+        $user = auth('api')->user();
+
         // 檢查使用者是否已登入
-        if (!auth('api')->check()) {
+        if (!$user) {
             return response()->json([
                 'success' => false,
                 'status' => 401,
@@ -24,10 +27,7 @@ class AdminMiddleware
                 'data' => null,
             ], 401);
         }
-
         // 檢查使用者是否為管理者
-        $user = auth('api')->user();
-
         if (!$user->isAdmin()) {
             return response()->json([
                 'success' => false,

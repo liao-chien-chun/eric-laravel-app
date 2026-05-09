@@ -19,7 +19,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // 指定允許的前端 URL（不能用 * 因為要支援 credentials）
+    'allowed_origins' => [
+        'http://localhost:3000',      // Vue 開發伺服器
+        'http://127.0.0.1:3000',      // 另一種 localhost
+        'http://localhost:5173',      // Vite 預設 port（備用）
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +34,7 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    // 必須設為 true，配合前端的 withCredentials
+    'supports_credentials' => true,
 
 ];

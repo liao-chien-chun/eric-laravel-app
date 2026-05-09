@@ -62,6 +62,9 @@ class UserService
             throw new Exception('帳號或密碼錯誤', 401);
         }
 
+        //  載入 role relationship
+        $user->load('role');
+
         try {
             //  建立 JWT Token
             $token = JWTAuth::fromUser($user);

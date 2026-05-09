@@ -15,7 +15,26 @@ namespace App\Swagger\Schemas\User;
  *         @OA\Property(property="user", type="object",
  *             @OA\Property(property="id", type="integer", example=1),
  *             @OA\Property(property="name", type="string", example="Eric"),
- *             @OA\Property(property="email", type="string", example="eric@example.com")
+ *             @OA\Property(property="email", type="string", example="eric@example.com"),
+ *             @OA\Property(
+ *                  property="role",
+ *                  type="object",
+ *                 @OA\Property(
+ *                     property="id",
+ *                     type="integer",
+ *                     example=2
+ *                 ),
+ *                 @OA\Property(
+ *                     property="name",
+ *                     type="string",
+ *                     example="user"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="display_name",
+ *                     type="string",
+ *                     example="一般使用者"
+ *                 )
+ *             )
  *         )
  *     )
  * )

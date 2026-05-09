@@ -22,6 +22,12 @@ class UserLoginResource extends JsonResource
                 'id' => $this['user']['id'],
                 'name' => $this['user']['name'],
                 'email' => $this['user']['email'],
+
+                "role" => [
+                    'id' => $this['user']['role']['id'],
+                    'name' => $this['user']['role']['name'],
+                    'display_name' => $this['user']['role']['display_name'],
+                ]
             ]
         ];
     }
