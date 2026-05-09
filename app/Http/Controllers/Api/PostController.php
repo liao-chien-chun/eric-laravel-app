@@ -227,4 +227,45 @@ class PostController extends Controller
             ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * 取得自己的文章進行編輯
+     *
+     * @param int $id 文章 ID（路由參數）
+     * @return JsonResponse
+     */
+    public function edit(int $id): JsonResponse
+    {
+        try {
+            $post = $this->postService->getPostForEdit($id);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '文章取得成功',
+                'data' => new PostResource($post)
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_FORBIDDEN);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

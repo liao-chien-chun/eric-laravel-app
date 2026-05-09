@@ -156,4 +156,26 @@ class PostService
 
         return $post->fresh()->load('user');
     }
+
+    /**
+     * 取得文章進行編輯（檢查擁有者權限）
+     *
+     * @param int $id 文章 ID
+     * @return Post
+     * @throws AuthorizationException
+     * @throws ModelNotFoundException
+     */
+    public function getPostForEdit(int $id): Post
+    {
+        // 查詢文章，找不到會自動拋出 ModelNotFoundException
+        $post = $this->postRepository->findPostById($id);
+
+        // 使用 Policy 檢查權限，確保只有文章擁有者可以取得編輯資料
+        if (Gate::denies('update', $post)) {
+            throw new AuthorizationException('你沒有權限修改該文章');
+        }
+
+        // 預載 user 關聯，避免 Resource 那邊變 null 或 lazy loading
+        return $post->load('user');
+    }
 }

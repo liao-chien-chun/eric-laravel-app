@@ -42,6 +42,12 @@ Route::prefix('user')->group(function () {
 
 // 要驗證的
 Route::middleware('auth:api')->group(function () {
+
+    // 我的文章
+    Route::prefix('me')->group(function () {
+        Route::get('/posts/{post}', [PostController::class, 'edit']);
+    });
+
     // 文章
     Route::prefix('posts')->group(function () {
         // 新增文章
