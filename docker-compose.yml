@@ -3,7 +3,7 @@ version: '3.8'
 
 # 定義多個服務(容器)
 services:
-  # app 服務(Laravel + PHP + Composer) 
+  # app 服務(Laravel + PHP + Composer)
   app:
     build:
       context: .
@@ -17,8 +17,39 @@ services:
       - ./:/var/www
     # 等待 mysql 與 redis 啟動後再跑 laravel app
     depends_on:
-      - mysql 
-      - redis 
+      - mysql
+      - redis
+
+  # Scheduler 服務（持續執行排程任務）
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_scheduler
+    restart: always
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+      - redis
+    command: php artisan schedule:work
+
+  # Queue Worker 服務（處理背景任務）
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_queue
+    restart: always
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+      - redis
+    # 使用 sync driver 時這個 worker 不會真正處理 queue，但切換到 redis/database driver 時就會需要
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600 
 
   # MySQL 服務
   mysql:
