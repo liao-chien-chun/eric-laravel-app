@@ -92,4 +92,37 @@ class PostRepository
     {
         return $post->update(['status' => $status]);
     }
+
+    /**
+     * 取得所有已發布的文章（前台用，分頁）
+     *
+     * @param int $perPage 每頁筆數，預設 15
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getPublishedPosts(int $perPage = 15)
+    {
+        return Post::where('status', 2) // 只顯示已發布的文章
+            ->with('user') // 預載使用者資訊
+            ->orderBy('created_at', 'desc') // 按時間排序，最新的在前
+            ->paginate($perPage);
+    }
+
+    /**
+     * 取得單一已發布的文章（前台用）
+     *
+     * @param int $id 文章 ID
+     * @return Post
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function findPublishedPostById(int $id): Post
+    {
+        try {
+            return Post::where('id', $id)
+                ->where('status', 2) // 只能查看已發布的文章
+                ->with('user') // 預載使用者資訊
+                ->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            throw new ModelNotFoundException("找不到該文章或文章尚未發布");
+        }
+    }
 }

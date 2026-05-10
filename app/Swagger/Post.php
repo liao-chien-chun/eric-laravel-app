@@ -360,6 +360,91 @@ namespace App\Swagger;
  *             @OA\Property(property="data", type="string", nullable=true, example=null)
  *         )
  *     )
+ * ),
+ *
+ * @OA\Get(
+ *     path="/api/posts",
+ *     summary="取得所有已發布的文章（前台用）",
+ *     tags={"Post"},
+ *     description="公開 API，不需登入即可取得所有已發布的文章列表，按時間排序（最新的在前），支援分頁",
+ *     operationId="getFrontendPosts",
+ *
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         description="每頁顯示的文章數量，預設 15，最小 1，最大 50",
+ *         required=false,
+ *         @OA\Schema(type="integer", example=15, minimum=1, maximum=50)
+ *     ),
+ *
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         description="頁碼，預設 1",
+ *         required=false,
+ *         @OA\Schema(type="integer", example=1, minimum=1)
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="文章列表取得成功",
+ *         @OA\JsonContent(ref="#/components/schemas/FrontPostListResponse")
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=500,
+ *         description="伺服器錯誤",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=500),
+ *             @OA\Property(property="message", type="string", example="伺服器錯誤，請稍後再試"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     )
+ * ),
+ *
+ * @OA\Get(
+ *     path="/api/posts/{post}",
+ *     summary="取得單一已發布的文章（前台用）",
+ *     tags={"Post"},
+ *     description="公開 API，不需登入即可查看單一已發布的文章詳細內容",
+ *     operationId="getFrontendPost",
+ *
+ *     @OA\Parameter(
+ *         name="post",
+ *         in="path",
+ *         description="文章 ID",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="文章取得成功",
+ *         @OA\JsonContent(ref="#/components/schemas/FrontPostResponse")
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=404,
+ *         description="找不到該文章或文章尚未發布",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=404),
+ *             @OA\Property(property="message", type="string", example="找不到該文章或文章尚未發布"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=500,
+ *         description="伺服器錯誤",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=500),
+ *             @OA\Property(property="message", type="string", example="伺服器錯誤，請稍後再試"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     )
  * )
  */
 

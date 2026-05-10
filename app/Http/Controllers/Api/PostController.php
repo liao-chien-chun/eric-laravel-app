@@ -7,6 +7,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\GetUserPostsRequest;
 use App\Http\Requests\UpdatePostStatusRequest;
 use App\Http\Resources\PostResource;
+use App\Http\Resources\FrontPostResource;
 use App\Services\PostService;
 use Illuminate\Support\Facades\Auth;
 use Exception;
@@ -264,6 +265,77 @@ class PostController extends Controller
                 'success' => false,
                 'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => $e->getMessage(),
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 取得所有已發布的文章（前台用，不需登入）
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request): JsonResponse
+    {
+        try {
+            $perPage = (int) $request->query('per_page', 15);
+
+            $posts = $this->postService->getPublishedPostsForFrontend($perPage);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '文章列表取得成功',
+                'data' => [
+                    'posts' => FrontPostResource::collection($posts->items()),
+                    'pagination' => [
+                        'current_page' => $posts->currentPage(),
+                        'per_page' => $posts->perPage(),
+                        'total' => $posts->total(),
+                        'last_page' => $posts->lastPage(),
+                    ],
+                ],
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => '伺服器錯誤，請稍後再試',
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 取得單一已發布的文章（前台用，不需登入）
+     *
+     * @param int $id 文章 ID（路由參數）
+     * @return JsonResponse
+     */
+    public function show(int $id): JsonResponse
+    {
+        try {
+            $post = $this->postService->getPublishedPostForFrontend($id);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '文章取得成功',
+                'data' => new FrontPostResource($post)
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => '伺服器錯誤，請稍後再試',
                 'data' => null
             ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
         }

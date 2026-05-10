@@ -23,6 +23,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// 前台公開 API（不需登入）
+Route::prefix('posts')->group(function () {
+    // 取得所有已發布的文章（分頁）
+    Route::get('/', [PostController::class, 'index']);
+    // 取得單一已發布的文章
+    Route::get('/{post}', [PostController::class, 'show']);
+});
 
 Route::prefix('user')->group(function () {
     // 使用者註冊

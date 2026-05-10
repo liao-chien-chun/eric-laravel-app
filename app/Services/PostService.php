@@ -178,4 +178,30 @@ class PostService
         // 預載 user 關聯，避免 Resource 那邊變 null 或 lazy loading
         return $post->load('user');
     }
+
+    /**
+     * 取得所有已發布的文章（前台用，不需登入）
+     *
+     * @param int $perPage 每頁筆數，預設 15，限制在 1-50 之間
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getPublishedPostsForFrontend(int $perPage = 15)
+    {
+        // 限制每頁筆數在 1-50 之間
+        $perPage = max(1, min(50, $perPage));
+
+        return $this->postRepository->getPublishedPosts($perPage);
+    }
+
+    /**
+     * 取得單一已發布的文章（前台用，不需登入）
+     *
+     * @param int $id 文章 ID
+     * @return Post
+     * @throws ModelNotFoundException
+     */
+    public function getPublishedPostForFrontend(int $id): Post
+    {
+        return $this->postRepository->findPublishedPostById($id);
+    }
 }
