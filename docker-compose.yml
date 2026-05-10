@@ -146,6 +146,13 @@ services:
       timeout: 10s
       retries: 5
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
 # 定義 volume
 volumes:
   db_data:

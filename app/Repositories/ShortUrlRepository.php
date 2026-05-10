@@ -106,9 +106,10 @@ class ShortUrlRepository
     public function chunkExpiredShortUrls(int $chunkSize, callable $callback): bool
     {
         return ShortUrl::query()
+            ->with('user:id,name,email')
             ->whereNotNull('expired_at')
             ->where('expired_at', '<', now())
-            ->select(['id', 'short_code'])
+            ->select(['id', 'user_id', 'original_url', 'short_code'])
             ->orderBy('id')
             ->chunkById($chunkSize, $callback);
     }

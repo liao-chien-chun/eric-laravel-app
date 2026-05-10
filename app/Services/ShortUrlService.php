@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ShortUrl;
+use App\Notifications\ExpiredShortUrlDeletedNotification;
 use App\Repositories\ShortUrlRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -234,12 +235,33 @@ class ShortUrlService
         $this->shortUrlRepository->chunkExpiredShortUrls($chunkSize, function ($shortUrls) use (&$deletedCount) {
             $ids = $shortUrls->pluck('id');
             $codes = $shortUrls->pluck('short_code');
+            $notificationData = $shortUrls->map(function (ShortUrl $shortUrl) {
+                return [
+                    'user' => $shortUrl->user,
+                    'short_url' => [
+                        'original_url' => $shortUrl->original_url,
+                        'short_code' => $shortUrl->short_code,
+                        'expired_at' => $shortUrl->expired_at,
+                    ],
+                ];
+            });
 
-            $deletedCount += $this->shortUrlRepository->deleteByIds($ids);
+            $deletedInChunk = $this->shortUrlRepository->deleteByIds($ids);
+            $deletedCount += $deletedInChunk;
 
             $codes->each(function (string $code) {
                 Cache::forget(self::CACHE_KEY_CODE_PREFIX . $code);
             });
+
+            if ($deletedInChunk > 0) {
+                $notificationData->each(function (array $data) {
+                    if ($data['user'] === null) {
+                        return;
+                    }
+
+                    $data['user']->notify(new ExpiredShortUrlDeletedNotification($data['short_url']));
+                });
+            }
         });
 
         return $deletedCount;
