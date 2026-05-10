@@ -3,6 +3,85 @@
 namespace App\Swagger;
 
 /**
+ * @OA\Get(
+ *     path="/api/posts/{post}/comments",
+ *     summary="取得文章的所有留言（前台用）",
+ *     tags={"Comment"},
+ *     description="公開 API，不需登入即可取得已發布文章的所有留言，支援分頁與排序，適用於前端留言滾動或載入更多功能",
+ *     operationId="getFrontendPostComments",
+ *
+ *     @OA\Parameter(
+ *         name="post",
+ *         in="path",
+ *         description="文章 ID",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         description="每頁顯示的留言數量，預設 20，最小 1，最大 50",
+ *         required=false,
+ *         @OA\Schema(type="integer", example=20, minimum=1, maximum=50)
+ *     ),
+ *
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         description="頁碼，預設 1（前端可用於載入更多：page=1, page=2, ...）",
+ *         required=false,
+ *         @OA\Schema(type="integer", example=1, minimum=1)
+ *     ),
+ *
+ *     @OA\Parameter(
+ *         name="sort",
+ *         in="query",
+ *         description="排序方式（asc: 最舊的在前，適合傳統留言區；desc: 最新的在前），預設 asc",
+ *         required=false,
+ *         @OA\Schema(type="string", enum={"asc", "desc"}, example="asc")
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="留言列表取得成功",
+ *         @OA\JsonContent(ref="#/components/schemas/FrontCommentListResponse")
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=404,
+ *         description="找不到該文章或文章尚未發布",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=404),
+ *             @OA\Property(property="message", type="string", example="找不到該文章或文章尚未發布"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=422,
+ *         description="參數驗證失敗",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=422),
+ *             @OA\Property(property="message", type="string", example="排序參數只能是 asc 或 desc"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=500,
+ *         description="伺服器錯誤",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=500),
+ *             @OA\Property(property="message", type="string", example="伺服器錯誤，請稍後再試"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     )
+ * ),
+ *
  * @OA\Post(
  *     path="/api/posts/{post}/comments",
  *     summary="對文章新增留言",

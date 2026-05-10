@@ -47,7 +47,7 @@ class CommentService
 
     /**
      * 修改留言
-     * 
+     *
      * @param array $data
      * @param int $postId
      * @param int $commentId
@@ -74,5 +74,32 @@ class CommentService
         $this->commentRepository->updateComment($comment, $data);
 
         return $comment;
+    }
+
+    /**
+     * 取得文章的所有留言（前台用，不需登入）
+     *
+     * @param int $postId 文章 ID
+     * @param int $perPage 每頁筆數，預設 20，限制在 1-50 之間
+     * @param string $sortOrder 排序方式 (asc: 最舊的在前, desc: 最新的在前)，預設 asc
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @throws ModelNotFoundException 當文章不存在或尚未發布時
+     * @throws \Exception 當排序參數不合法時
+     */
+    public function getPostCommentsForFrontend(int $postId, int $perPage = 20, string $sortOrder = 'asc')
+    {
+        // 檢查文章是否存在且已發布（使用前台專用的方法）
+        $this->postRepository->findPublishedPostById($postId);
+
+        // 限制每頁筆數在 1-50 之間
+        $perPage = max(1, min(50, $perPage));
+
+        // 驗證排序參數
+        $sortOrder = strtolower($sortOrder);
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            throw new \Exception('排序參數只能是 asc 或 desc', 422);
+        }
+
+        return $this->commentRepository->getPostComments($postId, $perPage, $sortOrder);
     }
 }

@@ -29,6 +29,8 @@ Route::prefix('posts')->group(function () {
     Route::get('/', [PostController::class, 'index']);
     // 取得單一已發布的文章
     Route::get('/{post}', [PostController::class, 'show']);
+    // 取得文章的所有留言（分頁）
+    Route::get('/{post}/comments', [CommentController::class, 'index']);
 });
 
 Route::prefix('user')->group(function () {

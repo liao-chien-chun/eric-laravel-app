@@ -40,7 +40,7 @@ class CommentRepository
 
     /**
      * 修改留言
-     * 
+     *
      * @param Comment $comment
      * @param array $data
      * @return bool
@@ -48,5 +48,21 @@ class CommentRepository
     public function updateComment(Comment $comment, array $data): bool
     {
         return $comment->update($data);
+    }
+
+    /**
+     * 取得文章的所有留言（分頁）
+     *
+     * @param int $postId 文章 ID
+     * @param int $perPage 每頁筆數，預設 20
+     * @param string $sortOrder 排序方式 (asc: 最舊的在前, desc: 最新的在前)，預設 asc
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getPostComments(int $postId, int $perPage = 20, string $sortOrder = 'asc')
+    {
+        return Comment::where('post_id', $postId)
+            ->with('user') // 預載使用者資訊，避免 N+1 查詢
+            ->orderBy('created_at', $sortOrder) // 按時間排序
+            ->paginate($perPage);
     }
 }
