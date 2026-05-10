@@ -445,6 +445,59 @@ namespace App\Swagger;
  *             @OA\Property(property="data", type="string", nullable=true, example=null)
  *         )
  *     )
+ * ),
+ *
+ * @OA\Post(
+ *     path="/api/posts/{post}/view",
+ *     summary="記錄文章觀看（前台用）",
+ *     tags={"Post"},
+ *     description="公開 API，不需登入即可記錄文章觀看次數。使用 Redis 緩存，有防刷機制（同一 IP 5 分鐘內重複觀看不計數）。前端應在進入文章頁面時呼叫此 API。",
+ *     operationId="recordPostView",
+ *
+ *     @OA\Parameter(
+ *         name="post",
+ *         in="path",
+ *         description="文章 ID",
+ *         required=true,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=200,
+ *         description="觀看記錄成功",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="status", type="integer", example=200),
+ *             @OA\Property(property="message", type="string", example="觀看記錄成功"),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="object",
+ *                 @OA\Property(property="recorded", type="boolean", example=true, description="是否成功記錄（false 表示觸發防刷機制）")
+ *             )
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=404,
+ *         description="找不到該文章或文章尚未發布",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=404),
+ *             @OA\Property(property="message", type="string", example="找不到該文章或文章尚未發布"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=500,
+ *         description="伺服器錯誤",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=500),
+ *             @OA\Property(property="message", type="string", example="伺服器錯誤，請稍後再試"),
+ *             @OA\Property(property="data", type="string", nullable=true, example=null)
+ *         )
+ *     )
  * )
  */
 

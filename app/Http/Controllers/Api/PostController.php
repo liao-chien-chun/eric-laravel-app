@@ -9,6 +9,7 @@ use App\Http\Requests\UpdatePostStatusRequest;
 use App\Http\Resources\PostResource;
 use App\Http\Resources\FrontPostResource;
 use App\Services\PostService;
+use App\Services\PostViewService;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -25,7 +26,8 @@ use Illuminate\Http\Request;
 class PostController extends Controller
 {
     public function __construct(
-        private PostService $postService
+        private PostService $postService,
+        private PostViewService $postViewService
     ) {}
 
     /**
@@ -323,6 +325,47 @@ class PostController extends Controller
                 'status' => Response::HTTP_OK,
                 'message' => '文章取得成功',
                 'data' => new FrontPostResource($post)
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => '伺服器錯誤，請稍後再試',
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 記錄文章觀看（前台用，不需登入）
+     *
+     * @param Request $request
+     * @param int $id 文章 ID
+     * @return JsonResponse
+     */
+    public function recordView(Request $request, int $id): JsonResponse
+    {
+        try {
+            // 取得使用者 IP
+            $ipAddress = $request->ip();
+
+            // 記錄觀看（會自動檢查文章是否存在且已發布，並有防刷機制）
+            $recorded = $this->postViewService->recordView($id, $ipAddress);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => $recorded ? '觀看記錄成功' : '觀看記錄已存在（防刷機制）',
+                'data' => [
+                    'recorded' => $recorded
+                ]
             ], Response::HTTP_OK);
         } catch (ModelNotFoundException $e) {
             return response()->json([

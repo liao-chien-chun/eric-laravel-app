@@ -31,6 +31,8 @@ class FrontPostResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name
             ],
+            'comments_count' => $this->comments_count ?? 0, // 留言數量
+            'views_count' => $this->views_count ?? 0, // 觀看次數（會在 Service 層合併 Redis 的值）
             'created_at' => $this->formatDateTime($this->created_at),
             'updated_at' => $this->formatDateTime($this->updated_at),
         ];

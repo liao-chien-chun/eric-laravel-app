@@ -103,6 +103,7 @@ class PostRepository
     {
         return Post::where('status', 2) // 只顯示已發布的文章
             ->with('user') // 預載使用者資訊
+            ->withCount('comments') // 預載留言數量
             ->orderBy('created_at', 'desc') // 按時間排序，最新的在前
             ->paginate($perPage);
     }
@@ -120,9 +121,22 @@ class PostRepository
             return Post::where('id', $id)
                 ->where('status', 2) // 只能查看已發布的文章
                 ->with('user') // 預載使用者資訊
+                ->withCount('comments') // 預載留言數量
                 ->firstOrFail();
         } catch (ModelNotFoundException $e) {
             throw new ModelNotFoundException("找不到該文章或文章尚未發布");
         }
+    }
+
+    /**
+     * 增加文章觀看次數（用於排程回寫）
+     *
+     * @param int $postId 文章 ID
+     * @param int $incrementBy 增加的數量
+     * @return bool
+     */
+    public function incrementViewsCount(int $postId, int $incrementBy): bool
+    {
+        return Post::where('id', $postId)->increment('views_count', $incrementBy);
     }
 }

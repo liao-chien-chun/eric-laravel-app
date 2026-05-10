@@ -31,6 +31,8 @@ Route::prefix('posts')->group(function () {
     Route::get('/{post}', [PostController::class, 'show']);
     // 取得文章的所有留言（分頁）
     Route::get('/{post}/comments', [CommentController::class, 'index']);
+    // 記錄文章觀看（用於統計觀看次數）
+    Route::post('/{post}/view', [PostController::class, 'recordView']);
 });
 
 Route::prefix('user')->group(function () {

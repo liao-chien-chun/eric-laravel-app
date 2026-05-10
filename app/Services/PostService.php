@@ -10,14 +10,17 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
- * 
+ *
  * Class PostService
- * 
+ *
  * 負責處理文章邏輯層的操作
  */
-class PostService 
+class PostService
 {
-    public function __construct(private PostRepository $postRepository) {}
+    public function __construct(
+        private PostRepository $postRepository,
+        private PostViewService $postViewService
+    ) {}
 
     /**
      * 建立文章
@@ -190,7 +193,17 @@ class PostService
         // 限制每頁筆數在 1-50 之間
         $perPage = max(1, min(50, $perPage));
 
-        return $this->postRepository->getPublishedPosts($perPage);
+        $posts = $this->postRepository->getPublishedPosts($perPage);
+
+        // 批次合併 Redis 中的觀看次數
+        $viewsCounts = $this->postViewService->getViewsCountForPosts($posts->items());
+
+        // 將合併後的觀看次數設定到每篇文章
+        foreach ($posts as $post) {
+            $post->views_count = $viewsCounts[$post->id] ?? $post->views_count;
+        }
+
+        return $posts;
     }
 
     /**
@@ -202,6 +215,11 @@ class PostService
      */
     public function getPublishedPostForFrontend(int $id): Post
     {
-        return $this->postRepository->findPublishedPostById($id);
+        $post = $this->postRepository->findPublishedPostById($id);
+
+        // 合併 Redis 中的觀看次數
+        $post->views_count = $this->postViewService->getViewsCount($id, $post->views_count);
+
+        return $post;
     }
 }
