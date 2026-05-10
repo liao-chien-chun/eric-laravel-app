@@ -6,6 +6,7 @@ use App\Models\ShortUrl;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 
 class ShortUrlRepository
 {
@@ -93,5 +94,37 @@ class ShortUrlRepository
     public function incrementClickCount(int $id): bool
     {
         return ShortUrl::where('id', $id)->increment('click_count') > 0;
+    }
+
+    /**
+     * 分批處理已過期短網址
+     *
+     * @param int $chunkSize 每批筆數
+     * @param callable(Collection<int, ShortUrl>): void $callback
+     * @return bool
+     */
+    public function chunkExpiredShortUrls(int $chunkSize, callable $callback): bool
+    {
+        return ShortUrl::query()
+            ->whereNotNull('expired_at')
+            ->where('expired_at', '<', now())
+            ->select(['id', 'short_code'])
+            ->orderBy('id')
+            ->chunkById($chunkSize, $callback);
+    }
+
+    /**
+     * 批次刪除短網址
+     *
+     * @param Collection<int, int> $ids
+     * @return int
+     */
+    public function deleteByIds(Collection $ids): int
+    {
+        if ($ids->isEmpty()) {
+            return 0;
+        }
+
+        return ShortUrl::whereIn('id', $ids)->delete();
     }
 }

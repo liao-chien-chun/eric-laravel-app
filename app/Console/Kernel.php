@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\CleanupExpiredShortUrlsJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -25,6 +26,13 @@ class Kernel extends ConsoleKernel
             // ->hourly()           // 生產環境：每小時執行一次
             ->everyMinute()         // 測試用：每分鐘執行一次
             ->onOneServer();        // 多伺服器環境下只在一台執行
+
+        // 每天 01:00 清除已過期短網址
+        $schedule->job(new CleanupExpiredShortUrlsJob)
+            ->dailyAt('01:00')
+            // ->everyMinute()  
+            ->withoutOverlapping()
+            ->onOneServer();
     }
 
     /**

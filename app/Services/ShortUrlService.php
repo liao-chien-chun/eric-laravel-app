@@ -222,6 +222,30 @@ class ShortUrlService
     }
 
     /**
+     * 清除已過期短網址
+     *
+     * @param int $chunkSize 每批處理筆數
+     * @return int 已刪除筆數
+     */
+    public function cleanupExpired(int $chunkSize = 1000): int
+    {
+        $deletedCount = 0;
+
+        $this->shortUrlRepository->chunkExpiredShortUrls($chunkSize, function ($shortUrls) use (&$deletedCount) {
+            $ids = $shortUrls->pluck('id');
+            $codes = $shortUrls->pluck('short_code');
+
+            $deletedCount += $this->shortUrlRepository->deleteByIds($ids);
+
+            $codes->each(function (string $code) {
+                Cache::forget(self::CACHE_KEY_CODE_PREFIX . $code);
+            });
+        });
+
+        return $deletedCount;
+    }
+
+    /**
      * 快取短碼對應資料
      *
      * @param ShortUrl $short 模型
