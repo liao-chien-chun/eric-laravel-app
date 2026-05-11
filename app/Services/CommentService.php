@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\PostChanged;
 use App\Models\Comment;
 use App\Repositories\CommentRepository;
 use App\Repositories\PostRepository;
@@ -25,7 +26,7 @@ class CommentService
 
     /**
      * 對文章新增留言
-     * 
+     *
      * @param array $data
      * @param int $postId
      * @return Comment
@@ -41,6 +42,8 @@ class CommentService
         $data['post_id'] = $post->id;
 
         $comment = $this->commentRepository->createComment($data);
+
+        PostChanged::dispatch($postId, 'index');
 
         return $comment;
     }
@@ -102,4 +105,5 @@ class CommentService
 
         return $this->commentRepository->getPostComments($postId, $perPage, $sortOrder);
     }
+
 }

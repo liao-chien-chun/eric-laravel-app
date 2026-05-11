@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Events\PostChanged;
 use App\Models\Post;
 use App\Repositories\PostRepository;
-use App\Jobs\SyncSinglePostToES;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate; // or use $this->authorize in Controller
 use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
  */
 class PostService
 {
+
     public function __construct(
         private PostRepository $postRepository,
         private PostViewService $postViewService,
@@ -39,8 +41,7 @@ class PostService
 
         $post = $this->postRepository->createPost($data);
 
-        // 同步到 Elasticsearch（背景任務）
-        SyncSinglePostToES::dispatch($post->id, 'index');
+        PostChanged::dispatch($post->id, 'index');
 
         // 預載 user 關聯，避免 Resource 那邊變 null 或 lazy loading
         return $post->load('user');
@@ -73,8 +74,9 @@ class PostService
 
         $this->postRepository->updatePost($post, $data);
 
-        // 同步到 Elasticsearch（背景任務）
-        SyncSinglePostToES::dispatch($post->id, 'index');
+        PostChanged::dispatch($post->id, 'index');
+        // 以下效果跟上面一樣
+        // event(new PostChanged($post->id, 'index'));
 
         return $post->load('user');
     }
@@ -118,9 +120,9 @@ class PostService
 
         $result = $this->postRepository->deletePost($post);
 
-        // 從 Elasticsearch 刪除（背景任務）
+        // 清除文章緩存並從 ES 刪除
         if ($result) {
-            SyncSinglePostToES::dispatch($id, 'delete');
+            PostChanged::dispatch($id, 'delete');
         }
 
         return $result;
@@ -173,8 +175,7 @@ class PostService
 
         $this->postRepository->updatePostStatus($post, $status);
 
-        // 同步到 Elasticsearch（背景任務）
-        SyncSinglePostToES::dispatch($post->id, 'index');
+        PostChanged::dispatch($post->id, 'index');
 
         return $post->fresh()->load('user');
     }
@@ -265,6 +266,7 @@ class PostService
 
     /**
      * 取得單一已發布的文章（前台用，不需登入）
+     * 使用緩存機制提升效能
      *
      * @param int $id 文章 ID
      * @return Post
@@ -272,11 +274,31 @@ class PostService
      */
     public function getPublishedPostForFrontend(int $id): Post
     {
-        $post = $this->postRepository->findPublishedPostById($id);
+        $cacheKey = $this->getPostCacheKey($id);
+        $cacheTtl = config('post_cache.ttl', 3600);
 
-        // 合併 Redis 中的觀看次數
+        // 嘗試從緩存取得文章
+        $post = Cache::remember($cacheKey, $cacheTtl, function () use ($id) {
+            // 緩存未命中，從資料庫查詢
+            Log::info("[PostCache] 緩存未命中，從資料庫查詢", ['post_id' => $id]);
+            return $this->postRepository->findPublishedPostById($id);
+        });
+
+        // 合併 Redis 中的觀看次數（觀看次數不緩存，保持即時性）
         $post->views_count = $this->postViewService->getViewsCount($id, $post->views_count);
 
         return $post;
+    }
+
+    /**
+     * 取得文章緩存鍵
+     *
+     * @param int $postId 文章 ID
+     * @return string
+     */
+    private function getPostCacheKey(int $postId): string
+    {
+        $prefix = config('post_cache.key_prefix', 'post:published:');
+        return $prefix . $postId;
     }
 }
