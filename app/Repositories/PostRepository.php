@@ -139,4 +139,67 @@ class PostRepository
     {
         return Post::where('id', $postId)->increment('views_count', $incrementBy);
     }
+
+    /**
+     * 根據 ID 陣列取得已發布的文章（保持順序）
+     *
+     * @param array $postIds 文章 ID 陣列（已排序）
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getPublishedPostsByIds(array $postIds)
+    {
+        if (empty($postIds)) {
+            return collect();
+        }
+
+        // 取得文章，但順序會被打亂
+        $posts = Post::whereIn('id', $postIds)
+            ->where('status', 2)
+            ->with('user')
+            ->withCount('comments')
+            ->get();
+
+        // 根據原始 ID 順序重新排序
+        $postsById = $posts->keyBy('id');
+        $orderedPosts = collect();
+
+        foreach ($postIds as $id) {
+            if (isset($postsById[$id])) {
+                $orderedPosts->push($postsById[$id]);
+            }
+        }
+
+        return $orderedPosts;
+    }
+
+    /**
+     * 取得所有已發布的文章（支援排序，分頁）
+     *
+     * @param string $sortBy 排序欄位 (created_at, views_count, comments_count)
+     * @param string $order 排序方向 (asc, desc)
+     * @param int $perPage 每頁筆數，預設 15
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getPublishedPostsWithSort(string $sortBy = 'created_at', string $order = 'desc', int $perPage = 15)
+    {
+        $query = Post::where('status', 2)
+            ->with('user')
+            ->withCount('comments');
+
+        // 根據排序欄位排序
+        if ($sortBy === 'comments_count') {
+            $query->orderBy('comments_count', $order);
+        } elseif ($sortBy === 'views_count') {
+            $query->orderBy('views_count', $order);
+        } else {
+            $query->orderBy('created_at', $order);
+        }
+
+        // 次要排序：時間倒序
+        if ($sortBy !== 'created_at') {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        return $query->paginate($perPage);
+    }
 }

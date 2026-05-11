@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\GetUserPostsRequest;
 use App\Http\Requests\UpdatePostStatusRequest;
+use App\Http\Requests\SearchPostsRequest;
 use App\Http\Resources\PostResource;
 use App\Http\Resources\FrontPostResource;
 use App\Services\PostService;
@@ -274,16 +275,20 @@ class PostController extends Controller
 
     /**
      * 取得所有已發布的文章（前台用，不需登入）
+     * 支援搜尋、排序、分頁
      *
-     * @param Request $request
+     * @param SearchPostsRequest $request
      * @return JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(SearchPostsRequest $request): JsonResponse
     {
         try {
-            $perPage = (int) $request->query('per_page', 15);
+            // 取得搜尋參數
+            $searchParams = $request->getSearchParams();
+            $page = (int) $request->query('page', 1);
 
-            $posts = $this->postService->getPublishedPostsForFrontend($perPage);
+            // 呼叫 service 層搜尋
+            $posts = $this->postService->getPublishedPostsForFrontend($searchParams, $page);
 
             return response()->json([
                 'success' => true,

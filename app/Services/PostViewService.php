@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\PostRepository;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 
 /**
  * Class PostViewService
@@ -72,10 +73,10 @@ class PostViewService
     /**
      * 取得所有文章的觀看次數（批次處理，用於列表頁）
      *
-     * @param array $posts 文章陣列（包含 id 和 views_count）
+     * @param array|Collection $posts 文章集合或陣列（包含 id 和 views_count）
      * @return array 文章 ID => 總觀看次數的對應
      */
-    public function getViewsCountForPosts(array $posts): array
+    public function getViewsCountForPosts(array|Collection $posts): array
     {
         $result = [];
 

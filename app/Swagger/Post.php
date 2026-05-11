@@ -364,10 +364,42 @@ namespace App\Swagger;
  *
  * @OA\Get(
  *     path="/api/posts",
- *     summary="取得所有已發布的文章（前台用）",
+ *     summary="取得所有已發布的文章（前台用，支援搜尋與排序）",
  *     tags={"Post"},
- *     description="公開 API，不需登入即可取得所有已發布的文章列表，按時間排序（最新的在前），支援分頁",
+ *     description="公開 API，不需登入即可取得所有已發布的文章列表。支援全文搜尋（使用 Elasticsearch）、多種排序方式、分頁功能。預設按時間排序（最新的在前）。",
  *     operationId="getFrontendPosts",
+ *
+ *     @OA\Parameter(
+ *         name="keyword",
+ *         in="query",
+ *         description="搜尋關鍵字（搜尋文章標題與內容，使用 Elasticsearch）",
+ *         required=false,
+ *         @OA\Schema(type="string", example="Laravel", maxLength=255)
+ *     ),
+ *
+ *     @OA\Parameter(
+ *         name="sort_by",
+ *         in="query",
+ *         description="排序欄位（created_at: 發布時間, views_count: 觀看數, comments_count: 留言數），預設 created_at",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="string",
+ *             enum={"created_at", "views_count", "comments_count"},
+ *             example="created_at"
+ *         )
+ *     ),
+ *
+ *     @OA\Parameter(
+ *         name="order",
+ *         in="query",
+ *         description="排序方向（asc: 升序, desc: 降序），預設 desc",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="string",
+ *             enum={"asc", "desc"},
+ *             example="desc"
+ *         )
+ *     ),
  *
  *     @OA\Parameter(
  *         name="per_page",
@@ -389,6 +421,25 @@ namespace App\Swagger;
  *         response=200,
  *         description="文章列表取得成功",
  *         @OA\JsonContent(ref="#/components/schemas/FrontPostListResponse")
+ *     ),
+ *
+ *     @OA\Response(
+ *         response=422,
+ *         description="驗證失敗（參數格式錯誤）",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="status", type="integer", example=422),
+ *             @OA\Property(property="message", type="string", example="驗證失敗"),
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object",
+ *                 @OA\Property(
+ *                     property="sort_by",
+ *                     type="array",
+ *                     @OA\Items(type="string", example="排序欄位必須是 created_at、views_count 或 comments_count")
+ *                 )
+ *             )
+ *         )
  *     ),
  *
  *     @OA\Response(

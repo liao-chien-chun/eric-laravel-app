@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Post;
 use App\Repositories\PostRepository;
+use App\Jobs\SyncSinglePostToES;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate; // or use $this->authorize in Controller
+use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -19,12 +21,13 @@ class PostService
 {
     public function __construct(
         private PostRepository $postRepository,
-        private PostViewService $postViewService
+        private PostViewService $postViewService,
+        private PostSearchService $postSearchService
     ) {}
 
     /**
      * 建立文章
-     * 
+     *
      * @param array $data 使用者輸入之文章資料
      * @return \App\Models\Post 新建立的文章資料
      */
@@ -36,16 +39,19 @@ class PostService
 
         $post = $this->postRepository->createPost($data);
 
+        // 同步到 Elasticsearch（背景任務）
+        SyncSinglePostToES::dispatch($post->id, 'index');
+
         // 預載 user 關聯，避免 Resource 那邊變 null 或 lazy loading
         return $post->load('user');
     }
 
     /**
      * 更新文章
-     * 
+     *
      * @param int $id 文章 ID
      * @param array $data 更新的資料
-     * @return Post 
+     * @return Post
      * @throws AuthorizationException
      * @throws ModelNotFoundException
      * @throws \Exception 嘗試將已發布之文章改為草稿
@@ -66,6 +72,9 @@ class PostService
         }
 
         $this->postRepository->updatePost($post, $data);
+
+        // 同步到 Elasticsearch（背景任務）
+        SyncSinglePostToES::dispatch($post->id, 'index');
 
         return $post->load('user');
     }
@@ -107,7 +116,14 @@ class PostService
             throw new AuthorizationException('你沒有權限刪除該文章');
         }
 
-        return $this->postRepository->deletePost($post);
+        $result = $this->postRepository->deletePost($post);
+
+        // 從 Elasticsearch 刪除（背景任務）
+        if ($result) {
+            SyncSinglePostToES::dispatch($id, 'delete');
+        }
+
+        return $result;
     }
 
     /**
@@ -157,6 +173,9 @@ class PostService
 
         $this->postRepository->updatePostStatus($post, $status);
 
+        // 同步到 Elasticsearch（背景任務）
+        SyncSinglePostToES::dispatch($post->id, 'index');
+
         return $post->fresh()->load('user');
     }
 
@@ -184,16 +203,54 @@ class PostService
 
     /**
      * 取得所有已發布的文章（前台用，不需登入）
+     * 支援搜尋、排序、分頁
      *
-     * @param int $perPage 每頁筆數，預設 15，限制在 1-50 之間
+     * @param array $searchParams 搜尋參數 ['keyword', 'sort_by', 'order', 'per_page']
+     * @param int $page 頁碼
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getPublishedPostsForFrontend(int $perPage = 15)
+    public function getPublishedPostsForFrontend(array $searchParams = [], int $page = 1)
     {
-        // 限制每頁筆數在 1-50 之間
-        $perPage = max(1, min(50, $perPage));
+        $keyword = $searchParams['keyword'] ?? null;
+        $sortBy = $searchParams['sort_by'] ?? 'created_at';
+        $order = $searchParams['order'] ?? 'desc';
+        $perPage = max(1, min(50, $searchParams['per_page'] ?? 15));
 
-        $posts = $this->postRepository->getPublishedPosts($perPage);
+        // 如果有關鍵字，使用 Elasticsearch 搜尋
+        if (!empty($keyword)) {
+            try {
+                // 從 ES 搜尋取得文章 ID 與總數
+                $searchResult = $this->postSearchService->searchPosts($searchParams, $page);
+                $postIds = $searchResult['post_ids'];
+                $total = $searchResult['total'];
+
+                // 根據 ID 從資料庫取得文章資料（保持 ES 的排序）
+                $posts = $this->postRepository->getPublishedPostsByIds($postIds);
+
+                // 批次合併 Redis 中的觀看次數
+                if ($posts->isNotEmpty()) {
+                    $viewsCounts = $this->postViewService->getViewsCountForPosts($posts);
+                    foreach ($posts as $post) {
+                        $post->views_count = $viewsCounts[$post->id] ?? $post->views_count;
+                    }
+                }
+
+                // 手動建立 LengthAwarePaginator
+                return new \Illuminate\Pagination\LengthAwarePaginator(
+                    $posts,
+                    $total,
+                    $perPage,
+                    $page,
+                    ['path' => request()->url(), 'query' => request()->query()]
+                );
+            } catch (\Exception $e) {
+                // ES 搜尋失敗時，記錄錯誤並降級到資料庫查詢
+                Log::error('Elasticsearch 搜尋失敗，降級到資料庫查詢: ' . $e->getMessage());
+            }
+        }
+
+        // 無關鍵字或 ES 搜尋失敗時，使用資料庫查詢（支援排序）
+        $posts = $this->postRepository->getPublishedPostsWithSort($sortBy, $order, $perPage);
 
         // 批次合併 Redis 中的觀看次數
         $viewsCounts = $this->postViewService->getViewsCountForPosts($posts->items());

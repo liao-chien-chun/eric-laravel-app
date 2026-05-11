@@ -21,6 +21,14 @@ class Kernel extends ConsoleKernel
             ->onOneServer()         // 多伺服器環境下只在一台執行
             ->runInBackground();    // 背景執行
 
+        // 每天 00:30 同步已發布文章到 Elasticsearch
+        $schedule->command('es:sync-posts --chunk=100')
+            ->dailyAt('00:30')
+            // ->everyMinute()   // 測試用每分鐘
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
+
         // 每小時同步一次 Redis 中的文章觀看次數到資料庫（使用 Queue）
         $schedule->job(new \App\Jobs\SyncPostViewsToDatabase)
             ->hourly()           // 生產環境：每小時執行一次

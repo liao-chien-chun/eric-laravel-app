@@ -25,6 +25,7 @@ return [
     */
     'indices' => [
         'items' => env('ES_INDEX_ITEMS', 'laravel_items'),
+        'posts' => env('ES_INDEX_POSTS', 'laravel_posts'),
     ],
 
     /*
