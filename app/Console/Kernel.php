@@ -41,6 +41,14 @@ class Kernel extends ConsoleKernel
             // ->everyMinute()  
             ->withoutOverlapping()
             ->onOneServer();
+
+        // 每天 01:00 產生每日優惠券
+        $schedule->command('coupon:generate-daily')
+            ->dailyAt('01:00')
+            // ->everyMinute()   // 測試用每分鐘
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
     }
 
     /**

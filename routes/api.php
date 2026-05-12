@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\UserController;
@@ -33,6 +34,14 @@ Route::prefix('posts')->group(function () {
     Route::get('/{post}/comments', [CommentController::class, 'index']);
     // 記錄文章觀看（用於統計觀看次數）
     Route::post('/{post}/view', [PostController::class, 'recordView']);
+});
+
+// 優惠券（前台公開）
+Route::prefix('coupons')->group(function () {
+    // 取得可領取的優惠券列表
+    Route::get('/', [CouponController::class, 'index'])->middleware('optional.auth');
+    // 取得優惠券詳情
+    Route::get('/{coupon}', [CouponController::class, 'show'])->middleware('optional.auth');
 });
 
 Route::prefix('user')->group(function () {
@@ -97,5 +106,13 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [ShortUrlController::class, 'store']);
         // 刪除(只能刪除自己的)
         Route::delete('/{id}', [ShortUrlController::class, 'destroy']);
+    });
+
+    // 優惠券（需登入）
+    Route::prefix('coupons')->group(function () {
+        // 搶優惠券
+        Route::post('/{coupon}/claim', [CouponController::class, 'claim']);
+        // 取得我的優惠券列表
+        Route::get('/my', [CouponController::class, 'myCoupons']);
     });
 });
