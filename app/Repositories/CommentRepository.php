@@ -51,6 +51,16 @@ class CommentRepository
     }
 
     /**
+     * 刪除留言
+     * @param Comment $comment
+     * @return bool|null
+     */
+    public function deleteComment(Comment $comment): ?bool
+    {
+        return $comment->delete();
+    }
+
+    /**
      * 取得文章的所有留言（分頁）
      *
      * @param int $postId 文章 ID

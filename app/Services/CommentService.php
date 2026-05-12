@@ -106,4 +106,33 @@ class CommentService
         return $this->commentRepository->getPostComments($postId, $perPage, $sortOrder);
     }
 
+    /**
+     * 刪除留言
+     * 
+     * @param int $postId
+     * @param int $commentId
+     * @return bool
+     */
+    public function deleteComment(int $postId, int $commentId): bool
+    {
+        $comment = $this->commentRepository->findCommentByID($commentId);
+
+        if ($comment->post_id !== $postId) {
+            throw new AuthorizationException('此留言不屬於該文章，故無法刪除');
+        }
+
+        // 使用 Policy 檢查權限
+        if (Gate::denies('delete', $comment)) {
+            throw new AuthorizationException('你沒有權限刪除該留言');
+        }
+
+        $changedPostId = $comment->post_id;
+        $result = $this->commentRepository->deleteComment($comment);
+
+        if ($result) {
+            PostChanged::dispatch($changedPostId, 'index');
+        }
+
+        return (bool) $result;
+    }
 }

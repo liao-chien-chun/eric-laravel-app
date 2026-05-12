@@ -149,4 +149,47 @@ class CommentController extends Controller
             ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * 刪除留言
+     * 
+     * @param int $postId
+     * @param int $commentId
+     * @return JsonResponse
+     */
+    public function destroy(int $postId, int $commentId): JsonResponse
+    {
+        try {
+            $this->commentService->deleteComment($postId, $commentId);
+
+            return response()->json([
+                'success' => true,
+                'status' => Response::HTTP_OK,
+                'message' => '留言刪除成功',
+                'data' => null
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => $e->getMessage(),
+                'data' => null
+            ], Response::HTTP_FORBIDDEN);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'status' => $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => '伺服器錯誤，請稍後再試',
+                'data' => null
+            ], $e->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
+

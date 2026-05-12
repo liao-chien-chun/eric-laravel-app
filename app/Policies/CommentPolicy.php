@@ -37,7 +37,7 @@ class CommentPolicy
      */
     public function update(User $user, Comment $comment): bool
     {
-        // 使用者是留言的作者且該留言屬於該文章
+        // 使用者是留言的作者且該留言屬於使用者
         return $user->id === $comment->user_id;
     }
 
@@ -46,7 +46,8 @@ class CommentPolicy
      */
     public function delete(User $user, Comment $comment): bool
     {
-        //
+        // 使用者是留言的作者且該留言屬於使用者
+        return $user->id === $comment->user_id;
     }
 
     /**

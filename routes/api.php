@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
@@ -74,6 +74,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{post}/comments', [CommentController::class, 'store']);
         // 修改留言
         Route::PUT('/{post}/comments/{comment}', [CommentController::class, 'update']);
+        // 刪除留言
+        Route::delete('/{post}/comments/{comment}', [CommentController::class, 'destroy']);
     });
 
     // 管理者才能做的
