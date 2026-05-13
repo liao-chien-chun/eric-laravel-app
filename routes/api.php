@@ -36,13 +36,6 @@ Route::prefix('posts')->group(function () {
     Route::post('/{post}/view', [PostController::class, 'recordView']);
 });
 
-// 優惠券（前台公開）
-Route::prefix('coupons')->group(function () {
-    // 取得可領取的優惠券列表
-    Route::get('/', [CouponController::class, 'index'])->middleware('optional.auth');
-    // 取得優惠券詳情
-    Route::get('/{coupon}', [CouponController::class, 'show'])->middleware('optional.auth');
-});
 
 Route::prefix('user')->group(function () {
     // 使用者註冊
@@ -115,4 +108,13 @@ Route::middleware('auth:api')->group(function () {
         // 取得我的優惠券列表
         Route::get('/my', [CouponController::class, 'myCoupons']);
     });
+});
+
+
+// 優惠券（前台公開）
+Route::prefix('coupons')->group(function () {
+    // 取得可領取的優惠券列表
+    Route::get('/', [CouponController::class, 'index'])->middleware('optional.auth');
+    // 取得優惠券詳情
+    Route::get('/{coupon}', [CouponController::class, 'show'])->middleware('optional.auth');
 });

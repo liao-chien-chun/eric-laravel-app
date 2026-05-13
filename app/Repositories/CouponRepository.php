@@ -201,13 +201,17 @@ class CouponRepository
     public function getUserCoupons(int $userId, ?int $status = null, int $perPage = 15)
     {
         $query = UserCoupon::where('user_id', $userId)
-            ->with('coupon');
+            ->with('coupon')
+            ->join('coupons', 'coupons.id', '=', 'user_coupons.coupon_id')
+            ->select('user_coupons.*');
 
         if ($status !== null) {
-            $query->where('status', $status);
+            $query->where('user_coupons.status', $status);
         }
 
-        return $query->orderBy('claimed_at', 'desc')
+        return $query->orderByRaw('CASE WHEN coupons.end_at IS NULL THEN 1 ELSE 0 END ASC')
+            ->orderBy('coupons.end_at', 'asc')
+            ->orderBy('user_coupons.claimed_at', 'desc')
             ->paginate($perPage);
     }
 
